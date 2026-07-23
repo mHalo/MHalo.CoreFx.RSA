@@ -1,0 +1,35 @@
+{
+  "name": "rsatoolbox-crossfrom",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build:wasm": "dotnet publish src-core/RsaToolBox.Crossfrom.Core.csproj -c Release -o src/public/wasm-core",
+    "dev": "pnpm build:wasm && vite",
+    "build": "pnpm build:wasm && vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri:dev": "pnpm build:wasm && tauri dev",
+    "tauri:build": "pnpm build:wasm && tauri build",
+    "test": "vitest",
+    "lint": "eslint . --ext .vue,.ts,.tsx --fix"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-shell": "^2.0.0",
+    "naive-ui": "^2.39.0",
+    "pinia": "^2.2.0",
+    "vfonts": "^0.0.3",
+    "vue": "^3.4.0",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vue/test-utils": "^2.4.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^24.0.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.3.0",
+    "vitest": "^2.0.0",
+    "vue-tsc": "^2.0.0"
+  }
+}
