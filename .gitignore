@@ -29,3 +29,7 @@ src-tauri/gen
 
 # WASM build output
 src/public/wasm-core
+
+# .NET build output
+bin/
+obj/
