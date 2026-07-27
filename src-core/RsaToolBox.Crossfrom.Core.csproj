@@ -1,16 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <TargetFramework>net9.0-browser</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputType>Exe</OutputType>
-    <!-- wasm-tools workload is not installed and cannot be installed without elevated
-         privileges; disable the workload resolver and select the Mono runtime pack,
-         which the SDK downloads from NuGet directly. -->
-    <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
-    <RuntimeFlavor>Mono</RuntimeFlavor>
   </PropertyGroup>
 
   <ItemGroup>
