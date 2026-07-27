@@ -14,10 +14,15 @@ let exports: Record<string, (...args: unknown[]) => unknown> | null = null
 export async function initializeRuntime(): Promise<void> {
   if (exports) return
 
-  // The .NET 9 WASM host is preloaded by index.html as an inline module
-  // script (Vite refuses imports from source code into publicDir). The
-  // module stashes the dotnet API on globalThis.__dotnetHost.
-  const dotnet = (globalThis as unknown as { __dotnetHost: DotnetHost }).__dotnetHost
+  // The .NET 9 WASM host is published to <root>/wasm-core/ by the build:wasm
+  // script. The specifier is kept non-static so TypeScript skips module
+  // resolution (the module lives outside src/). Rollup also leaves it
+  // untouched via @vite-ignore so the WASM runtime loads as a separate
+  // module at runtime, preserving its relative .wasm file references.
+  const dotnetJsUrl = '/wasm-core/wwwroot/_framework/dotnet.js'
+  const { dotnet } = (await import(
+    /* @vite-ignore */ dotnetJsUrl
+  )) as { dotnet: DotnetHost }
   const runtime = await dotnet.create()
   const config = runtime.getConfig()
   const assemblyExports = await runtime.getAssemblyExports(config.mainAssemblyName)

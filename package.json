@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build:wasm": "dotnet publish src-core/RsaToolBox.Crossfrom.Core.csproj -c Release -o src/public/wasm-core",
+    "build:wasm": "dotnet publish src-core/RsaToolBox.Crossfrom.Core.csproj -c Release -o wasm-core",
     "dev": "pnpm build:wasm && vite",
     "build": "pnpm build:wasm && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
