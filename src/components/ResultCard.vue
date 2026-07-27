@@ -3,7 +3,7 @@
     <n-input
       v-model:value="localValue"
       type="textarea"
-      :rows="6"
+      :rows="3"
       readonly
     />
     <template #header-extra>

@@ -1,6 +1,6 @@
 <template>
   <n-config-provider :theme="isDark ? darkTheme : null">
-    <n-layout has-sider style="height: 100%">
+    <n-layout has-sider style="height: 100vh">
       <n-layout-sider
         bordered
         collapse-mode="width"
@@ -16,8 +16,8 @@
           @update:value="handleMenuSelect"
         />
       </n-layout-sider>
-      <n-layout>
-        <n-layout-content content-style="padding: 24px;">
+      <n-layout style="overflow: hidden">
+        <n-layout-content content-style="padding: 16px; height: 100vh; overflow-y: auto;">
           <n-message-provider>
             <router-view />
           </n-message-provider>

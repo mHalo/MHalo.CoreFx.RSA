@@ -11,7 +11,7 @@
             <key-input v-model="privateKey" label="私钥" placeholder="请输入私钥" is-private />
           </n-form-item>
           <n-form-item label="原文">
-            <n-input v-model:value="plainText" type="textarea" :rows="4" placeholder="请输入待签名内容" />
+            <n-input v-model:value="plainText" type="textarea" :rows="2" placeholder="请输入待签名内容" />
           </n-form-item>
           <n-form-item>
             <n-button type="primary" @click="handleSign">
@@ -31,10 +31,10 @@
             <key-input v-model="publicKey" label="公钥" placeholder="请输入公钥" />
           </n-form-item>
           <n-form-item label="原文">
-            <n-input v-model:value="plainText" type="textarea" :rows="4" placeholder="请输入待验签内容" />
+            <n-input v-model:value="plainText" type="textarea" :rows="2" placeholder="请输入待验签内容" />
           </n-form-item>
           <n-form-item label="签名">
-            <n-input v-model:value="signature" type="textarea" :rows="4" placeholder="请输入签名" />
+            <n-input v-model:value="signature" type="textarea" :rows="2" placeholder="请输入签名" />
           </n-form-item>
           <n-form-item>
             <n-button type="primary" @click="handleVerify">

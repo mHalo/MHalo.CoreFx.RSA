@@ -8,7 +8,7 @@
       v-model:value="localValue"
       type="textarea"
       :placeholder="placeholder"
-      :rows="8"
+      :rows="4"
       @update:value="onUpdate"
     />
   </div>
