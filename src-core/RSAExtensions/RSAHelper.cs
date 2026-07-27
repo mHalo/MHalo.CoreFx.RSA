@@ -1,7 +1,8 @@
 ﻿using MHalo.CoreFx.Helper.Encrypters.RSAExtensions;
 using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
-using System.Security.Cryptography;
 using System.Text;
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberCanBePrivate.Global
@@ -16,22 +17,30 @@ namespace MHalo.CoreFx.Helper
     public static class RSAHelper
     {
         /// <summary>
-        /// 创建RSA
+        /// 创建RSA密钥对 (BouncyCastle, 默认2048位，与 .NET RSA.Create() 默认长度一致)
         /// </summary>
         /// <returns></returns>
-        public static RSA Create()
+        public static AsymmetricCipherKeyPair Create()
         {
-            return RSA.Create();
+            return Create(2048);
         }
 
         /// <summary>
-        /// 创建RSA
+        /// 创建RSA密钥对 (BouncyCastle)
         /// </summary>
         /// <param name="keySizeInBits">512/1024/2048/</param>
         /// <returns></returns>
-        public static RSA Create(int keySizeInBits)
+        public static AsymmetricCipherKeyPair Create(int keySizeInBits)
         {
-            return RSA.Create(keySizeInBits);
+            var generator = new RsaKeyPairGenerator();
+            generator.Init(new KeyGenerationParameters(new SecureRandom(), keySizeInBits));
+            AsymmetricCipherKeyPair keyPair;
+            // 保证模数位数与 keySizeInBits 完全一致（与 .NET RSA.Create(keySizeInBits) 行为一致）
+            do
+            {
+                keyPair = generator.GenerateKeyPair();
+            } while (((RsaKeyParameters)keyPair.Public).Modulus.BitLength != keySizeInBits);
+            return keyPair;
         }
 
         #region 密钥生成
@@ -45,21 +54,23 @@ namespace MHalo.CoreFx.Helper
         public static (string publicKey, string privateKey) ExportRSAKey(RSAKeyType keyType, int keySizeInBits, bool usePemFormat = false)
         {
             string publicKey, privateKey;
-            using var rsa = Create(keySizeInBits);
-            if(keyType == RSAKeyType.Xml)
+            AsymmetricCipherKeyPair keyPair = Create(keySizeInBits);
+            var privateKeyParameter = (RsaPrivateCrtKeyParameters)keyPair.Private;
+            var publicKeyParameter = (RsaKeyParameters)keyPair.Public;
+            if (keyType == RSAKeyType.Xml)
             {
-                privateKey = rsa.ExportPrivateKey(RSAKeyType.Xml);
-                publicKey = rsa.ExportPublicKey(RSAKeyType.Xml);
+                privateKey = RSAKeyExtensions.ExportPrivateKey(privateKeyParameter, RSAKeyType.Xml);
+                publicKey = RSAKeyExtensions.ExportPublicKey(publicKeyParameter, RSAKeyType.Xml);
             }
-            else if(keyType == RSAKeyType.Pkcs8)
+            else if (keyType == RSAKeyType.Pkcs8)
             {
-                privateKey = rsa.ExportPrivateKey(RSAKeyType.Pkcs8, usePemFormat);
-                publicKey = rsa.ExportPublicKey(RSAKeyType.Pkcs8, usePemFormat);
+                privateKey = RSAKeyExtensions.ExportPrivateKey(privateKeyParameter, RSAKeyType.Pkcs8, usePemFormat);
+                publicKey = RSAKeyExtensions.ExportPublicKey(publicKeyParameter, RSAKeyType.Pkcs8, usePemFormat);
             }
             else
             {
-                privateKey = rsa.ExportPrivateKey(RSAKeyType.Pkcs1, usePemFormat);
-                publicKey = rsa.ExportPublicKey(RSAKeyType.Pkcs1, usePemFormat);
+                privateKey = RSAKeyExtensions.ExportPrivateKey(privateKeyParameter, RSAKeyType.Pkcs1, usePemFormat);
+                publicKey = RSAKeyExtensions.ExportPublicKey(publicKeyParameter, RSAKeyType.Pkcs1, usePemFormat);
             }
             return (publicKey, privateKey);
         }
@@ -75,9 +86,9 @@ namespace MHalo.CoreFx.Helper
         /// <returns></returns>
         public static string ExportPublicKeyFromPrivateKey(RSAKeyType keyType, string privateKeyContent, bool usePemFormat = false)
         {
-            using var rsa = RSA.Create(); 
-            rsa.ImportPrivateKey(keyType, privateKeyContent, true);
-            return rsa.ExportPublicKey(keyType, usePemFormat);
+            RsaPrivateCrtKeyParameters privateKeyParameter = RSAKeyExtensions.ImportPrivateKey(keyType, privateKeyContent, true);
+            var publicKeyParameter = new RsaKeyParameters(false, privateKeyParameter.Modulus, privateKeyParameter.PublicExponent);
+            return RSAKeyExtensions.ExportPublicKey(publicKeyParameter, keyType, usePemFormat);
         }
 
         /// <summary>
@@ -91,9 +102,8 @@ namespace MHalo.CoreFx.Helper
         {
             if(RSAKeyExtensions.IsValidPublicKey(publicKeyContent, out var orginalKeyType))
             {
-                using var rsa = RSA.Create();
-                rsa.ImportPublicKey(orginalKeyType!.Value, publicKeyContent);
-                return rsa.ExportPublicKey(outKeyType, usePemFormat);
+                RsaKeyParameters publicKeyParameter = RSAKeyExtensions.ImportPublicKey(orginalKeyType!.Value, publicKeyContent, true);
+                return RSAKeyExtensions.ExportPublicKey(publicKeyParameter, outKeyType, usePemFormat);
             }
             else
             {
@@ -115,10 +125,10 @@ namespace MHalo.CoreFx.Helper
             privateKeyContent = PemFormatUtil.RemoveFormat(privateKeyContent);
             if (RSAKeyExtensions.IsValidPrivateKey(privateKeyContent, out var orginalKeyType))
             {
-                using var rsa = RSA.Create();
-                rsa.ImportPrivateKey(orginalKeyType!.Value, privateKeyContent);
-                publicKey = rsa.ExportPublicKey(targetKeyType, usePemFormat);
-                privateKey = rsa.ExportPrivateKey(targetKeyType, usePemFormat);
+                RsaPrivateCrtKeyParameters privateKeyParameter = RSAKeyExtensions.ImportPrivateKey(orginalKeyType!.Value, privateKeyContent);
+                var publicKeyParameter = new RsaKeyParameters(false, privateKeyParameter.Modulus, privateKeyParameter.PublicExponent);
+                publicKey = RSAKeyExtensions.ExportPublicKey(publicKeyParameter, targetKeyType, usePemFormat);
+                privateKey = RSAKeyExtensions.ExportPrivateKey(privateKeyParameter, targetKeyType, usePemFormat);
                 return true;
             }
             else

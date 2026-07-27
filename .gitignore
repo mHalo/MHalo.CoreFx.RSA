@@ -33,3 +33,6 @@ src/public/wasm-core
 # .NET build output
 bin/
 obj/
+
+# RSA verify datasets (generated)
+tests/RsaParityVerify/work/

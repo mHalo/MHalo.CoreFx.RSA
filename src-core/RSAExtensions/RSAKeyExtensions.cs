@@ -1,12 +1,11 @@
-﻿using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
-using System.Security.Cryptography;
+using Org.BouncyCastle.X509;
 using System.Xml;
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberCanBePrivate.Global
@@ -14,31 +13,21 @@ using System.Xml;
 namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
 {
     /// <summary>
-    /// RSA export key extensions.Support XML format import and export and PEM format.
+    /// RSA key import/export helpers. Support XML format and PEM format.
+    /// BouncyCastle only: no dependency on System.Security.Cryptography.RSA,
+    /// so the code runs on browser-wasm.
     /// </summary>
     public static class RSAKeyExtensions
     {
         #region ImportKey
 
-        public static void ImportPkcs8PublicKey(this RSA rsa, byte[] publicKey)
-        {
-            RsaKeyParameters publicKeyParam = (RsaKeyParameters)PublicKeyFactory.CreateKey(publicKey);
-            var pub = new RSAParameters
-            {
-                Modulus = publicKeyParam.Modulus.ToByteArrayUnsigned(),
-                Exponent = publicKeyParam.Exponent.ToByteArrayUnsigned()
-            };
-            rsa.ImportParameters(pub);
-        }
         /// <summary>
-        /// Export RSA private key
+        /// Import a private key (base64 body, PEM or XML) into BouncyCastle CRT key parameters.
         /// </summary>
-        /// <param name="rsa"></param>
-        /// <param name="type"></param>
-        /// <param name="privateKey"></param>
-        /// <param name="isPem">当密钥类型为Xml时，此参数不起效</param>
-        /// <returns></returns>
-        public static void ImportPrivateKey(this RSA rsa, RSAKeyType type, string privateKey, bool isPem = false)
+        /// <param name="type">密钥类型</param>
+        /// <param name="privateKey">私钥内容</param>
+        /// <param name="isPem">是否为PEM格式,当密钥类型为Xml时，此参数不起效</param>
+        public static RsaPrivateCrtKeyParameters ImportPrivateKey(RSAKeyType type, string privateKey, bool isPem = false)
         {
             if (isPem)
             {
@@ -47,27 +36,23 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
             switch (type)
             {
                 case RSAKeyType.Pkcs1:
-                    rsa.ImportRSAPrivateKey(Convert.FromBase64String(privateKey), out _);
-                    break;
+                    return ParsePkcs1PrivateKey(Convert.FromBase64String(privateKey));
                 case RSAKeyType.Pkcs8:
-                    rsa.ImportPkcs8PrivateKey(Convert.FromBase64String(privateKey), out _);
-                    break;
+                    return ParsePkcs8PrivateKey(Convert.FromBase64String(privateKey));
                 case RSAKeyType.Xml:
-                    rsa.ImportXmlPrivateKey(privateKey);
-                    break;
+                    return RSAXmlExtensions.ParseXmlPrivateKey(privateKey);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
+
         /// <summary>
-        /// Export RSA public key
+        /// Import a public key (base64 body, PEM or XML) into BouncyCastle key parameters.
         /// </summary>
-        /// <param name="rsa"></param>
-        /// <param name="type"></param>
-        /// <param name="publicKey"></param>
-        /// <param name="isPem">当密钥类型为Xml时，此参数不起效</param>
-        /// <returns></returns>
-        public static void ImportPublicKey(this RSA rsa, RSAKeyType type, string publicKey, bool isPem = false)
+        /// <param name="type">密钥类型</param>
+        /// <param name="publicKey">公钥内容</param>
+        /// <param name="isPem">是否为PEM格式,当密钥类型为Xml时，此参数不起效</param>
+        public static RsaKeyParameters ImportPublicKey(RSAKeyType type, string publicKey, bool isPem = false)
         {
             if (isPem)
             {
@@ -77,36 +62,74 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
             switch (type)
             {
                 case RSAKeyType.Pkcs1:
-                    rsa.ImportRSAPublicKey(Convert.FromBase64String(publicKey), out _);
-                    break;
+                    return ParsePkcs1PublicKey(Convert.FromBase64String(publicKey));
                 case RSAKeyType.Pkcs8:
-                    rsa.ImportPkcs8PublicKey(Convert.FromBase64String(publicKey));
-                    break;
+                    return ParsePkcs8PublicKey(Convert.FromBase64String(publicKey));
                 case RSAKeyType.Xml:
-                    rsa.ImportXmlPublicKey(publicKey);
-                    break;
+                    return RSAXmlExtensions.ParseXmlPublicKey(publicKey);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 
+        private static RsaPrivateCrtKeyParameters ParsePkcs1PrivateKey(byte[] privateKey)
+        {
+            RsaPrivateKeyStructure structure = RsaPrivateKeyStructure.GetInstance(Asn1Object.FromByteArray(privateKey));
+            return new RsaPrivateCrtKeyParameters(
+                structure.Modulus,
+                structure.PublicExponent,
+                structure.PrivateExponent,
+                structure.Prime1,
+                structure.Prime2,
+                structure.Exponent1,
+                structure.Exponent2,
+                structure.Coefficient);
+        }
+
+        private static RsaPrivateCrtKeyParameters ParsePkcs8PrivateKey(byte[] privateKey)
+        {
+            AsymmetricKeyParameter key = PrivateKeyFactory.CreateKey(privateKey);
+            if (key is not RsaPrivateCrtKeyParameters rsaKey)
+            {
+                throw new ArgumentException("The pkcs8 private key is not a valid RSA private key.");
+            }
+            return rsaKey;
+        }
+
+        private static RsaKeyParameters ParsePkcs1PublicKey(byte[] publicKey)
+        {
+            RsaPublicKeyStructure structure = RsaPublicKeyStructure.GetInstance(Asn1Object.FromByteArray(publicKey));
+            return new RsaKeyParameters(false, structure.Modulus, structure.PublicExponent);
+        }
+
+        private static RsaKeyParameters ParsePkcs8PublicKey(byte[] publicKey)
+        {
+            AsymmetricKeyParameter key = PublicKeyFactory.CreateKey(publicKey);
+            if (key is not RsaKeyParameters rsaKey || rsaKey.IsPrivate)
+            {
+                throw new ArgumentException("The pkcs8 public key is not a valid RSA public key.");
+            }
+            return rsaKey;
+        }
+
         #endregion
 
         #region ExportKey
+
         /// <summary>
-        /// Export RSA private key
+        /// Export a private key. Output is byte-for-byte identical to the original
+        /// System.Security.Cryptography.RSA based implementation.
         /// </summary>
-        /// <param name="rsa"></param>
-        /// <param name="type"></param>
+        /// <param name="privateKey">BouncyCastle CRT private key parameters</param>
+        /// <param name="type">密钥类型</param>
         /// <param name="usePemFormat">当密钥类型为Xml时，此参数不起效</param>
-        /// <returns></returns>
-        public static string ExportPrivateKey(this RSA rsa, RSAKeyType type, bool usePemFormat = false)
+        public static string ExportPrivateKey(RsaPrivateCrtKeyParameters privateKey, RSAKeyType type, bool usePemFormat = false)
         {
             var key = type switch
             {
-                RSAKeyType.Pkcs1 => Convert.ToBase64String(rsa.ExportRSAPrivateKey()),
-                RSAKeyType.Pkcs8 => Convert.ToBase64String(rsa.ExportPkcs8PrivateKey()),
-                RSAKeyType.Xml => rsa.ExportXmlPrivateKey(),
+                RSAKeyType.Pkcs1 => Convert.ToBase64String(ExportPkcs1PrivateKey(privateKey)),
+                RSAKeyType.Pkcs8 => Convert.ToBase64String(ExportPkcs8PrivateKey(privateKey)),
+                RSAKeyType.Xml => privateKey.ToXmlPrivateKeyString(),
                 _ => string.Empty
             };
 
@@ -117,20 +140,21 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
 
             return key;
         }
+
         /// <summary>
-        /// Export RSA public key
+        /// Export a public key. Output is byte-for-byte identical to the original
+        /// System.Security.Cryptography.RSA based implementation.
         /// </summary>
-        /// <param name="rsa"></param>
-        /// <param name="type"></param>
+        /// <param name="publicKey">BouncyCastle public key parameters</param>
+        /// <param name="type">密钥类型</param>
         /// <param name="usePemFormat">当密钥类型为Xml时，此参数不起效</param>
-        /// <returns></returns>
-        public static string ExportPublicKey(this RSA rsa, RSAKeyType type, bool usePemFormat = false)
+        public static string ExportPublicKey(RsaKeyParameters publicKey, RSAKeyType type, bool usePemFormat = false)
         {
             var key = type switch
             {
-                RSAKeyType.Pkcs1 => Convert.ToBase64String(rsa.ExportRSAPublicKey()),
-                RSAKeyType.Pkcs8 => Convert.ToBase64String(rsa.ExportPkcs8PublicKey()),
-                RSAKeyType.Xml => rsa.ExportXmlPublicKey(),
+                RSAKeyType.Pkcs1 => Convert.ToBase64String(ExportPkcs1PublicKey(publicKey)),
+                RSAKeyType.Pkcs8 => Convert.ToBase64String(ExportPkcs8PublicKey(publicKey)),
+                RSAKeyType.Xml => publicKey.ToXmlPublicKeyString(),
                 _ => string.Empty
             };
 
@@ -141,49 +165,75 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
 
             return key;
         }
-        public static byte[] ExportPkcs8PublicKey(this RSA rsa)
+
+        /// <summary>
+        /// PKCS#1 RSAPrivateKey DER, identical to .NET ExportRSAPrivateKey().
+        /// </summary>
+        public static byte[] ExportPkcs1PrivateKey(RsaPrivateCrtKeyParameters privateKey)
         {
-            var pub = rsa.ExportParameters(false);
-            var rsaKeyParameters = new RsaKeyParameters(false, new BigInteger(1, pub.Modulus), new BigInteger(1, pub.Exponent));
-            var sw = new StringWriter();
-            var pWrt = new PemWriter(sw);
-            pWrt.WriteObject(rsaKeyParameters);
-            pWrt.Writer.Close();
-            return Convert.FromBase64String(PemFormatUtil.RemoveFormat(sw.ToString()));
+            var structure = new RsaPrivateKeyStructure(
+                privateKey.Modulus,
+                privateKey.PublicExponent,
+                privateKey.Exponent,
+                privateKey.P,
+                privateKey.Q,
+                privateKey.DP,
+                privateKey.DQ,
+                privateKey.QInv);
+            return structure.GetDerEncoded();
         }
+
+        /// <summary>
+        /// PKCS#8 PrivateKeyInfo DER, identical to .NET ExportPkcs8PrivateKey().
+        /// </summary>
+        public static byte[] ExportPkcs8PrivateKey(RsaPrivateCrtKeyParameters privateKey)
+        {
+            return PrivateKeyInfoFactory.CreatePrivateKeyInfo(privateKey).GetDerEncoded();
+        }
+
+        /// <summary>
+        /// PKCS#1 RSAPublicKey DER, identical to .NET ExportRSAPublicKey().
+        /// </summary>
+        public static byte[] ExportPkcs1PublicKey(RsaKeyParameters publicKey)
+        {
+            var structure = new RsaPublicKeyStructure(publicKey.Modulus, publicKey.Exponent);
+            return structure.GetDerEncoded();
+        }
+
+        /// <summary>
+        /// X.509 SubjectPublicKeyInfo DER, identical to .NET ExportSubjectPublicKeyInfo().
+        /// </summary>
+        public static byte[] ExportPkcs8PublicKey(RsaKeyParameters publicKey)
+        {
+            return SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(publicKey).GetDerEncoded();
+        }
+
         #endregion
 
         #region CreateAsymmetricKeyParameter
+
         private static class XMLRSAKeyManager
         {
-            private static readonly Dictionary<string, RSAParameters> cachedRSAParameters = new();
-            public static RSAParameters GetRSAPrivateParameters(string privateKeyContent)
+            private static readonly Dictionary<string, AsymmetricKeyParameter> cachedParameters = new();
+            public static AsymmetricKeyParameter GetPrivateParameters(string privateKeyContent)
             {
-                if (cachedRSAParameters.TryGetValue(privateKeyContent, out RSAParameters rsaParams))
+                if (cachedParameters.TryGetValue(privateKeyContent, out AsymmetricKeyParameter? param))
                 {
-                    return rsaParams;
+                    return param;
                 }
-                using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
-                {
-                    rsa.FromXmlString(privateKeyContent);
-                    rsaParams = rsa.ExportParameters(true);
-                    cachedRSAParameters[privateKeyContent] = rsaParams;
-                }
-                return rsaParams;
+                param = RSAXmlExtensions.ParseXmlPrivateKey(privateKeyContent);
+                cachedParameters[privateKeyContent] = param;
+                return param;
             }
-            public static RSAParameters GetRSAPublicParameters(string publicKeyContent)
+            public static AsymmetricKeyParameter GetPublicParameters(string publicKeyContent)
             {
-                if (cachedRSAParameters.TryGetValue(publicKeyContent, out RSAParameters rsaParams))
+                if (cachedParameters.TryGetValue(publicKeyContent, out AsymmetricKeyParameter? param))
                 {
-                    return rsaParams;
+                    return param;
                 }
-                using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
-                {
-                    rsa.FromXmlString(publicKeyContent);
-                    rsaParams = rsa.ExportParameters(false);
-                    cachedRSAParameters[publicKeyContent] = rsaParams;
-                }
-                return rsaParams;
+                param = RSAXmlExtensions.ParseXmlPublicKey(publicKeyContent);
+                cachedParameters[publicKeyContent] = param;
+                return param;
             }
         }
 
@@ -208,9 +258,7 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
             else
             {
                 // 获取RSA参数
-                RSAParameters rsaParams = XMLRSAKeyManager.GetRSAPublicParameters(publicKeyContent);
-                // 创建RsaKeyParameters
-                publicKeyParameter = new RsaKeyParameters(false, new BigInteger(1, rsaParams.Modulus), new BigInteger(1, rsaParams.Exponent));
+                publicKeyParameter = XMLRSAKeyManager.GetPublicParameters(publicKeyContent);
             }
             return publicKeyParameter;
         }
@@ -224,9 +272,16 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
                 byte[] keyByte = Convert.FromBase64String(privateKeyContent);
 
                 RsaPrivateKeyStructure privateKeyStructure = RsaPrivateKeyStructure.GetInstance(Asn1Object.FromByteArray(keyByte));
-                // 创建RSA公钥参数
-                privateKeyParameter = new RsaKeyParameters(true, privateKeyStructure.Modulus, privateKeyStructure.PrivateExponent);
-
+                // 创建RSA私钥参数
+                privateKeyParameter = new RsaPrivateCrtKeyParameters(
+                    privateKeyStructure.Modulus,
+                    privateKeyStructure.PublicExponent,
+                    privateKeyStructure.PrivateExponent,
+                    privateKeyStructure.Prime1,
+                    privateKeyStructure.Prime2,
+                    privateKeyStructure.Exponent1,
+                    privateKeyStructure.Exponent2,
+                    privateKeyStructure.Coefficient);
             }
             else if (keyType.Equals(RSAKeyType.Pkcs8))
             {
@@ -237,9 +292,7 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
             else
             {
                 // 获取RSA参数
-                RSAParameters rsaParams = XMLRSAKeyManager.GetRSAPrivateParameters(privateKeyContent);
-                // 创建RsaKeyParameters
-                privateKeyParameter = new RsaKeyParameters(true, new BigInteger(1, rsaParams.Modulus), new BigInteger(1, rsaParams.D));
+                privateKeyParameter = XMLRSAKeyManager.GetPrivateParameters(privateKeyContent);
             }
             return privateKeyParameter;
         }
@@ -253,20 +306,19 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
         {
             keyType = null;
             publicKey = PemFormatUtil.RemoveFormat(publicKey);
-            RSACryptoServiceProvider rsaPrivateKey = new();
             try
             {
-                rsaPrivateKey.ImportPublicKey(RSAKeyType.Pkcs1, publicKey);
+                ParsePkcs1PublicKey(Convert.FromBase64String(publicKey));
                 keyType = RSAKeyType.Pkcs1;
-                return rsaPrivateKey.PublicOnly;
+                return true;
             }
             catch
             {
                 try
                 {
-                    rsaPrivateKey.ImportPublicKey(RSAKeyType.Pkcs8, publicKey);
+                    ParsePkcs8PublicKey(Convert.FromBase64String(publicKey));
                     keyType = RSAKeyType.Pkcs8;
-                    return rsaPrivateKey.PublicOnly;
+                    return true;
                 }
                 catch
                 {
@@ -300,27 +352,25 @@ namespace MHalo.CoreFx.Helper.Encrypters.RSAExtensions
         {
             keyType = null;
             privateKey = PemFormatUtil.RemoveFormat(privateKey);
-            RSACryptoServiceProvider rsaPrivateKey = new();
             try
             {
-                rsaPrivateKey.ImportPrivateKey(RSAKeyType.Pkcs1, privateKey);
+                ParsePkcs1PrivateKey(Convert.FromBase64String(privateKey));
                 keyType = RSAKeyType.Pkcs1;
-                return !rsaPrivateKey.PublicOnly;
+                return true;
             }
             catch
             {
                 try
                 {
-                    rsaPrivateKey.ImportPrivateKey(RSAKeyType.Pkcs8, privateKey);
+                    ParsePkcs8PrivateKey(Convert.FromBase64String(privateKey));
                     keyType = RSAKeyType.Pkcs8;
-                    return !rsaPrivateKey.PublicOnly;
+                    return true;
                 }
                 catch
                 {
                     try
                     {
-                        //RSAParameters rsaParams = 
-                        XMLRSAKeyManager.GetRSAPrivateParameters(privateKey);
+                        RSAXmlExtensions.ParseXmlPrivateKey(privateKey);
                         keyType = RSAKeyType.Xml;
                         return true;
                     }
