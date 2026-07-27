@@ -8,6 +8,8 @@ export const useKeyStore = defineStore('key', () => {
   const publicKeyType = ref<RSAKeyType | null>(null)
   const privateKeyType = ref<RSAKeyType | null>(null)
   const isDark = ref(false)
+  const wasmReady = ref(false)
+  const wasmError = ref<string | null>(null)
 
   function setKeyPair(pair: RSAKeyPair, types: { public: RSAKeyType; private: RSAKeyType }) {
     publicKey.value = pair.publicKey
@@ -39,6 +41,8 @@ export const useKeyStore = defineStore('key', () => {
     publicKeyType,
     privateKeyType,
     isDark,
+    wasmReady,
+    wasmError,
     setKeyPair,
     setPublicKey,
     setPrivateKey,
