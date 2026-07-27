@@ -7,7 +7,30 @@
     <title>RSA ToolBox</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <p style="padding: 1em; font-family: sans-serif;">正在加载 RSA ToolBox...</p>
+    </div>
+    <script>
+      // Catch unhandled errors and show them on screen
+      window.addEventListener('error', (e) => {
+        document.getElementById('app').innerHTML =
+          '<pre style="color:red;padding:1em;font-family:monospace;white-space:pre-wrap">ERROR: ' +
+          e.message + '\n' + (e.error?.stack || '') + '</pre>'
+      })
+      window.addEventListener('unhandledrejection', (e) => {
+        document.getElementById('app').innerHTML =
+          '<pre style="color:red;padding:1em;font-family:monospace;white-space:pre-wrap">UNHANDLED REJECTION: ' +
+          e.reason + '</pre>'
+      })
+    </script>
+    <script type="module">
+      // Preload the .NET WASM host and stash it on globalThis.
+      // The import path bypasses Vite's module transform because the file
+      // lives at <root>/wasm-core/ and is served by the Vite dev server's
+      // static file middleware (configured in vite.config.ts).
+      const dotnetModule = await import('/wasm-core/wwwroot/_framework/dotnet.js')
+      globalThis.__dotnetHost = dotnetModule.dotnet
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
