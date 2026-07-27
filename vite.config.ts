@@ -4,6 +4,7 @@ import { resolve } from 'path'
 
 export default defineConfig(async () => ({
   plugins: [vue()],
+  publicDir: 'src/public',
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
