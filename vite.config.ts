@@ -18,7 +18,14 @@ export default defineConfig(async () => ({
         server.middlewares.use('/wasm-core', (req, res, next) => {
           const relativePath = req.url ?? ''
           const cleanPath = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath
-          const fsPath = resolve(__dirname, 'wasm-core', cleanPath)
+          const base = resolve(__dirname, 'wasm-core')
+          const fsPath = resolve(base, cleanPath)
+          // Prevent path traversal outside wasm-core/
+          if (!fsPath.startsWith(base + '/') && fsPath !== base) {
+            res.writeHead(403)
+            res.end('Forbidden')
+            return
+          }
           if (existsSync(fsPath)) {
             const content = readFileSync(fsPath)
             const ext = fsPath.split('.').pop() ?? ''

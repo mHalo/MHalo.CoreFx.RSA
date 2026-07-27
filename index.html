@@ -11,16 +11,19 @@
       <p style="padding: 1em; font-family: sans-serif;">正在加载 RSA ToolBox...</p>
     </div>
     <script>
-      // Catch unhandled errors and show them on screen
+      function showError(label, msg, stack) {
+        const el = document.getElementById('app')
+        el.textContent = ''
+        const pre = document.createElement('pre')
+        pre.style.cssText = 'color:red;padding:1em;font-family:monospace;white-space:pre-wrap'
+        pre.textContent = label + ': ' + msg + (stack ? '\n' + stack : '')
+        el.appendChild(pre)
+      }
       window.addEventListener('error', (e) => {
-        document.getElementById('app').innerHTML =
-          '<pre style="color:red;padding:1em;font-family:monospace;white-space:pre-wrap">ERROR: ' +
-          e.message + '\n' + (e.error?.stack || '') + '</pre>'
+        showError('ERROR', e.message, e.error?.stack)
       })
       window.addEventListener('unhandledrejection', (e) => {
-        document.getElementById('app').innerHTML =
-          '<pre style="color:red;padding:1em;font-family:monospace;white-space:pre-wrap">UNHANDLED REJECTION: ' +
-          e.reason + '</pre>'
+        showError('UNHANDLED REJECTION', e.reason, '')
       })
     </script>
     <script type="module">
