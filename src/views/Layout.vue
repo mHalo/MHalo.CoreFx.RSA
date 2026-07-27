@@ -18,7 +18,9 @@
       </n-layout-sider>
       <n-layout>
         <n-layout-content content-style="padding: 24px;">
-          <router-view />
+          <n-message-provider>
+            <router-view />
+          </n-message-provider>
         </n-layout-content>
       </n-layout>
     </n-layout>
@@ -28,7 +30,7 @@
 <script setup lang="ts">
 import { computed, h, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NConfigProvider, NIcon, darkTheme } from 'naive-ui'
+import { NConfigProvider, NIcon, NMessageProvider, darkTheme } from 'naive-ui'
 import {
   KeyOutline,
   LockClosedOutline,
