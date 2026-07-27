@@ -51,23 +51,23 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { SignerAlgorithm, RSAKeyType } from '@/types/rsa'
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { SignerAlgorithm } from '@/types/rsa'
 import { sign, verify } from '@/services/wasmRsaService'
 import { useKeyStore } from '@/stores/keyStore'
 import KeyInput from '@/components/KeyInput.vue'
 import ResultCard from '@/components/ResultCard.vue'
+import { useMessage } from 'naive-ui'
 
 const keyStore = useKeyStore()
+const message = useMessage()
+const { publicKey, privateKey, publicKeyType, privateKeyType } = storeToRefs(keyStore)
 
-const publicKey = ref('')
-const privateKey = ref('')
 const plainText = ref('')
 const signature = ref('')
 const signatureResult = ref('')
 const verifyResult = ref<boolean | null>(null)
-const publicKeyType = ref<RSAKeyType | null>(null)
-const privateKeyType = ref<RSAKeyType | null>(null)
 const signerAlgorithm = ref<SignerAlgorithm>(SignerAlgorithm.SHA256withRSA)
 
 const signerOptions = [
@@ -78,23 +78,18 @@ const signerOptions = [
   { label: 'MD5withRSA', value: SignerAlgorithm.MD5withRSA }
 ]
 
-onMounted(() => {
-  publicKey.value = keyStore.publicKey
-  privateKey.value = keyStore.privateKey
-  publicKeyType.value = keyStore.publicKeyType
-  privateKeyType.value = keyStore.privateKeyType
-})
-
 async function handleSign() {
   if (privateKeyType.value === null) {
-    throw new Error('无法识别私钥格式')
+    message.warning('无法识别私钥格式')
+    return
   }
   signatureResult.value = await sign(privateKeyType.value, plainText.value, privateKey.value, signerAlgorithm.value)
 }
 
 async function handleVerify() {
   if (publicKeyType.value === null) {
-    throw new Error('无法识别公钥格式')
+    message.warning('无法识别公钥格式')
+    return
   }
   verifyResult.value = await verify(publicKeyType.value, plainText.value, signature.value, publicKey.value, signerAlgorithm.value)
 }

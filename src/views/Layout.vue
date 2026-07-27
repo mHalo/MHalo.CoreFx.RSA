@@ -1,32 +1,34 @@
 <template>
-  <n-layout has-sider style="height: 100%">
-    <n-layout-sider
-      bordered
-      collapse-mode="width"
-      :collapsed-width="64"
-      :width="220"
-      show-trigger
-    >
-      <n-menu
-        :value="activeKey"
+  <n-config-provider :theme="isDark ? darkTheme : null">
+    <n-layout has-sider style="height: 100%">
+      <n-layout-sider
+        bordered
+        collapse-mode="width"
         :collapsed-width="64"
-        :collapsed-icon-size="22"
-        :options="menuOptions"
-        @update:value="handleMenuSelect"
-      />
-    </n-layout-sider>
-    <n-layout>
-      <n-layout-content content-style="padding: 24px;">
-        <router-view />
-      </n-layout-content>
+        :width="220"
+        show-trigger
+      >
+        <n-menu
+          :value="activeKey"
+          :collapsed-width="64"
+          :collapsed-icon-size="22"
+          :options="menuOptions"
+          @update:value="handleMenuSelect"
+        />
+      </n-layout-sider>
+      <n-layout>
+        <n-layout-content content-style="padding: 24px;">
+          <router-view />
+        </n-layout-content>
+      </n-layout>
     </n-layout>
-  </n-layout>
+  </n-config-provider>
 </template>
 
 <script setup lang="ts">
-import { computed, h } from 'vue'
+import { computed, h, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NIcon } from 'naive-ui'
+import { NConfigProvider, NIcon, darkTheme } from 'naive-ui'
 import {
   KeyOutline,
   LockClosedOutline,
@@ -34,9 +36,21 @@ import {
   SwapHorizontalOutline,
   SettingsOutline
 } from '@vicons/ionicons5'
+import { useKeyStore } from '@/stores/keyStore'
 
 const route = useRoute()
 const router = useRouter()
+const keyStore = useKeyStore()
+
+const isDark = computed(() => keyStore.isDark)
+
+watch(isDark, (value) => {
+  if (value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+})
 
 const activeKey = computed(() => route.name as string)
 

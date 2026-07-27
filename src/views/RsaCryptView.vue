@@ -46,23 +46,23 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { CipherAlgorithm, RSAKeyType } from '@/types/rsa'
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { CipherAlgorithm } from '@/types/rsa'
 import { encrypt, decrypt } from '@/services/wasmRsaService'
 import { useKeyStore } from '@/stores/keyStore'
 import KeyInput from '@/components/KeyInput.vue'
 import ResultCard from '@/components/ResultCard.vue'
+import { useMessage } from 'naive-ui'
 
 const keyStore = useKeyStore()
+const message = useMessage()
+const { publicKey, privateKey, publicKeyType, privateKeyType } = storeToRefs(keyStore)
 
-const publicKey = ref('')
-const privateKey = ref('')
 const plainText = ref('')
 const cipherText = ref('')
 const cipherResult = ref('')
 const plainResult = ref('')
-const publicKeyType = ref<RSAKeyType | null>(null)
-const privateKeyType = ref<RSAKeyType | null>(null)
 const cipherAlgorithm = ref<CipherAlgorithm>(CipherAlgorithm.RSA_ECB_PKCS1Padding)
 
 const cipherOptions = [
@@ -71,23 +71,18 @@ const cipherOptions = [
   { label: 'RSA/ECB/OAEPWithSHA-256AndMGF1Padding', value: CipherAlgorithm.RSA_ECB_OAEPWithSHA_256AndMGF1Padding }
 ]
 
-onMounted(() => {
-  publicKey.value = keyStore.publicKey
-  privateKey.value = keyStore.privateKey
-  publicKeyType.value = keyStore.publicKeyType
-  privateKeyType.value = keyStore.privateKeyType
-})
-
 async function handleEncrypt() {
   if (publicKeyType.value === null) {
-    throw new Error('无法识别公钥格式')
+    message.warning('无法识别公钥格式')
+    return
   }
   cipherResult.value = await encrypt(publicKeyType.value, plainText.value, publicKey.value, cipherAlgorithm.value)
 }
 
 async function handleDecrypt() {
   if (privateKeyType.value === null) {
-    throw new Error('无法识别私钥格式')
+    message.warning('无法识别私钥格式')
+    return
   }
   plainResult.value = await decrypt(privateKeyType.value, cipherText.value, privateKey.value, cipherAlgorithm.value)
 }

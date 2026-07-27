@@ -11,9 +11,6 @@
       <n-form-item label="PEM 格式">
         <n-switch v-model:value="usePemFormat" />
       </n-form-item>
-      <n-form-item label="保存到本地">
-        <n-switch v-model:value="saveToLocal" />
-      </n-form-item>
       <n-form-item>
         <n-button type="primary" @click="handleGenerate">
           生成密钥
@@ -43,14 +40,15 @@ import { RSAKeyType } from '@/types/rsa'
 import { generateKeyPair } from '@/services/wasmRsaService'
 import { useKeyStore } from '@/stores/keyStore'
 import ResultCard from '@/components/ResultCard.vue'
+import { useMessage } from 'naive-ui'
 
 const router = useRouter()
 const keyStore = useKeyStore()
+const message = useMessage()
 
 const keySize = ref(2048)
 const keyType = ref<RSAKeyType>(RSAKeyType.Pkcs8)
 const usePemFormat = ref(false)
-const saveToLocal = ref(false)
 
 const keyPair = reactive({ publicKey: '', privateKey: '' })
 
@@ -68,9 +66,13 @@ const keyTypeOptions = [
 ]
 
 async function handleGenerate() {
-  const result = await generateKeyPair(keyType.value, keySize.value, usePemFormat.value)
-  keyPair.publicKey = result.publicKey
-  keyPair.privateKey = result.privateKey
+  try {
+    const result = await generateKeyPair(keyType.value, keySize.value, usePemFormat.value)
+    keyPair.publicKey = result.publicKey
+    keyPair.privateKey = result.privateKey
+  } catch {
+    message.warning('密钥生成失败')
+  }
 }
 
 function sendToCrypt() {

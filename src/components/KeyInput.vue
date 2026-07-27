@@ -34,6 +34,7 @@ const emit = defineEmits<{
 
 const localValue = ref(props.modelValue)
 const detectedType = ref<RSAKeyType | null>(null)
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 watch(() => props.modelValue, (val) => {
   localValue.value = val
@@ -41,13 +42,16 @@ watch(() => props.modelValue, (val) => {
 
 async function onUpdate(value: string) {
   emit('update:modelValue', value)
-  try {
-    detectedType.value = await detectKeyType(value, props.isPrivate ?? false)
-    emit('type-detected', detectedType.value)
-  } catch {
-    detectedType.value = null
-    emit('type-detected', null)
-  }
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(async () => {
+    try {
+      detectedType.value = await detectKeyType(value, props.isPrivate ?? false)
+      emit('type-detected', detectedType.value)
+    } catch {
+      detectedType.value = null
+      emit('type-detected', null)
+    }
+  }, 300)
 }
 </script>
 

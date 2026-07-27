@@ -1,20 +1,22 @@
-const publicKeyHeaders: Record<number, [string, string]> = {
-  0: ['-----BEGIN RSA PUBLIC KEY-----', '-----END RSA PUBLIC KEY-----'],
-  1: ['-----BEGIN PUBLIC KEY-----', '-----END PUBLIC KEY-----']
+import { RSAKeyType } from '@/types/rsa'
+
+const publicKeyHeaders: Partial<Record<RSAKeyType, [string, string]>> = {
+  [RSAKeyType.Pkcs1]: ['-----BEGIN RSA PUBLIC KEY-----', '-----END RSA PUBLIC KEY-----'],
+  [RSAKeyType.Pkcs8]: ['-----BEGIN PUBLIC KEY-----', '-----END PUBLIC KEY-----']
 }
 
-const privateKeyHeaders: Record<number, [string, string]> = {
-  0: ['-----BEGIN RSA PRIVATE KEY-----', '-----END RSA PRIVATE KEY-----'],
-  1: ['-----BEGIN PRIVATE KEY-----', '-----END PRIVATE KEY-----']
+const privateKeyHeaders: Partial<Record<RSAKeyType, [string, string]>> = {
+  [RSAKeyType.Pkcs1]: ['-----BEGIN RSA PRIVATE KEY-----', '-----END RSA PRIVATE KEY-----'],
+  [RSAKeyType.Pkcs8]: ['-----BEGIN PRIVATE KEY-----', '-----END PRIVATE KEY-----']
 }
 
-export function formatPublicKey(type: number, base64Body: string): string {
+export function formatPublicKey(type: RSAKeyType, base64Body: string): string {
   const headers = publicKeyHeaders[type]
   if (!headers) throw new Error(`Public key type ${type} does not support PEM formatting`)
   return wrapWithPem(headers[0], headers[1], base64Body)
 }
 
-export function formatPrivateKey(type: number, base64Body: string): string {
+export function formatPrivateKey(type: RSAKeyType, base64Body: string): string {
   const headers = privateKeyHeaders[type]
   if (!headers) throw new Error(`Private key type ${type} does not support PEM formatting`)
   return wrapWithPem(headers[0], headers[1], base64Body)

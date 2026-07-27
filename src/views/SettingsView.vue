@@ -3,25 +3,16 @@
     <h2>设置</h2>
     <n-form label-placement="left" label-width="120px">
       <n-form-item label="深色主题">
-        <n-switch v-model:value="isDark" />
+        <n-switch v-model:value="keyStore.isDark" />
       </n-form-item>
     </n-form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { useKeyStore } from '@/stores/keyStore'
 
-const isDark = ref(false)
-
-watch(isDark, (value) => {
-  const html = document.documentElement
-  if (value) {
-    html.classList.add('dark')
-  } else {
-    html.classList.remove('dark')
-  }
-})
+const keyStore = useKeyStore()
 </script>
 
 <style scoped>

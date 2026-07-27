@@ -54,6 +54,9 @@ import { RSAKeyType } from '@/types/rsa'
 import { transformPublicKeyFormat, transformPrivateKeyFormat } from '@/services/wasmRsaService'
 import KeyInput from '@/components/KeyInput.vue'
 import ResultCard from '@/components/ResultCard.vue'
+import { useMessage } from 'naive-ui'
+
+const message = useMessage()
 
 const targetPublicType = ref<RSAKeyType>(RSAKeyType.Pkcs8)
 const targetPrivateType = ref<RSAKeyType>(RSAKeyType.Pkcs8)
@@ -79,7 +82,8 @@ async function handleTransformPublic() {
 async function handleTransformPrivate() {
   const result = await transformPrivateKeyFormat(inputPrivateKey.value, targetPrivateType.value, usePemPrivate.value)
   if (!result.success) {
-    throw new Error('私钥格式转换失败')
+    message.warning('私钥格式转换失败')
+    return
   }
   outputPublicKeyFromPrivate.value = result.publicKey
   outputPrivateKey.value = result.privateKey
