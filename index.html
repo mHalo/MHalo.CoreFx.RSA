@@ -8,6 +8,11 @@
   </head>
   <body>
     <div id="app"></div>
+    <!-- Preload the .NET WASM host module before the app starts -->
+    <script type="module">
+      import { dotnet } from '/wasm-core/wwwroot/_framework/dotnet.js'
+      globalThis.__dotnetHost = dotnet
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
