@@ -244,12 +244,15 @@ export default function SettingsPage() {
           <CardContent>
             <SettingRow
               label="当前版本"
-              desc={updateInfo
-                ? updateInfo.isUpdateAvailable
-                  ? `发现新版本 v${updateInfo.latestVersion}`
-                  : '已是最新'
-                : isChecking ? '检查中...' : ''
-            }
+              desc={
+                updateInfo
+                  ? updateInfo.isUpdateAvailable
+                    ? `发现新版本 v${updateInfo.latestVersion}`
+                    : '已是最新'
+                  : isChecking
+                    ? '检查中...'
+                    : ''
+              }
             >
               <div className="flex items-center gap-2">
                 <span className="text-sm font-mono">{updateInfo?.currentVersion ?? '-'}</span>
