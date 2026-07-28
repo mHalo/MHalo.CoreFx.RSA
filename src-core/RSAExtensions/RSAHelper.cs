@@ -35,11 +35,14 @@ namespace MHalo.CoreFx.Helper
             var generator = new RsaKeyPairGenerator();
             generator.Init(new KeyGenerationParameters(new SecureRandom(), keySizeInBits));
             AsymmetricCipherKeyPair keyPair;
-            // 保证模数位数与 keySizeInBits 完全一致（与 .NET RSA.Create(keySizeInBits) 行为一致）
+            // 尽量保证模数位数与 keySizeInBits 一致，但避免在 WASM/browser 中无限重试导致长时间阻塞
+            int attempts = 0;
+            const int maxAttempts = 10;
             do
             {
                 keyPair = generator.GenerateKeyPair();
-            } while (((RsaKeyParameters)keyPair.Public).Modulus.BitLength != keySizeInBits);
+                attempts++;
+            } while (((RsaKeyParameters)keyPair.Public).Modulus.BitLength != keySizeInBits && attempts < maxAttempts);
             return keyPair;
         }
 

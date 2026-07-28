@@ -44,6 +44,8 @@ export default function KeyGeneratePage() {
 
   async function handleGenerate() {
     setGenerating(true)
+    // Yield to browser so the loading overlay can paint before WASM blocks the main thread.
+    await new Promise((resolve) => setTimeout(resolve, 50))
     try {
       const result = await generateKeyPair(keyType, keySize, formatType === 'pem')
       setPublicKey(result.publicKey)
