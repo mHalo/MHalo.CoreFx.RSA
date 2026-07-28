@@ -85,49 +85,53 @@ export default function TransformPage() {
         className="mb-4"
       />
 
-      <Toolbar className="justify-center">
-        {processing && (
-          <div className="flex w-full items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground md:w-auto md:px-3">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            处理中…
-          </div>
-        )}
-        <ToolbarField label="目标密钥类型">
-          <Select
-            value={String(targetPrivateType)}
-            onValueChange={(v) => setTargetPrivateType(Number(v) as RSAKeyType)}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {keyTypeOptions.map((o) => (
-                <SelectItem key={o.value} value={String(o.value)}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ToolbarField>
-        <ToolbarField label="密钥格式">
-          <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as 'pem' | 'txt')}>
-            <SelectTrigger className="w-28">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {formatOptions.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ToolbarField>
+      {/* Toolbar: 控件左对齐，按钮在右侧 */}
+      <Toolbar className="justify-between">
+        <div className="flex items-center gap-x-5 gap-y-3">
+          <ToolbarField label="目标密钥类型">
+            <Select
+              value={String(targetPrivateType)}
+              onValueChange={(v) => setTargetPrivateType(Number(v) as RSAKeyType)}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {keyTypeOptions.map((o) => (
+                  <SelectItem key={o.value} value={String(o.value)}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </ToolbarField>
+          <ToolbarField label="密钥格式">
+            <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as 'pem' | 'txt')}>
+              <SelectTrigger className="w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {formatOptions.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </ToolbarField>
+        </div>
         <Button size="sm" disabled={processing} onClick={handleTransform}>
           {processing ? <Loader2 className="animate-spin" /> : <ArrowLeftRight />}
           转换密钥
         </Button>
       </Toolbar>
+
+      {processing && (
+        <div className="mb-3 flex items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          处理中…
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <KeyPanel
