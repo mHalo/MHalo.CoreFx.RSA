@@ -1,14 +1,14 @@
 <template>
   <div class="key-input">
-    <div class="key-input__header">
-      <span>{{ label }}</span>
+    <div class="rs-key-input__header">
+      <span class="rs-key-input__label">{{ label }}</span>
       <key-type-tag :type="detectedType" />
     </div>
     <n-input
       v-model:value="localValue"
       type="textarea"
       :placeholder="placeholder"
-      :rows="4"
+      :rows="5"
       @update:value="onUpdate"
     />
   </div>
@@ -56,10 +56,7 @@ async function onUpdate(value: string) {
 </script>
 
 <style scoped>
-.key-input__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+.key-input {
+  width: 100%;
 }
 </style>

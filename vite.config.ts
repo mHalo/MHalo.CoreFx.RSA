@@ -61,6 +61,11 @@ export default defineConfig(async () => ({
       '@': resolve(__dirname, 'src')
     }
   },
+  build: {
+    // index.html uses a top-level await to preload the .NET WASM host;
+    // Tauri's WKWebView/Chromium runtimes support it, so target modern envs.
+    target: 'es2022'
+  },
   clearScreen: false,
   server: {
     port: 1420,
