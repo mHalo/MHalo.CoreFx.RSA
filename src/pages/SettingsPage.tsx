@@ -231,19 +231,18 @@ export default function SettingsPage() {
             <CardDescription>应用版本与更新检查</CardDescription>
           </CardHeader>
           <CardContent>
-            <SettingRow
-              label="当前版本"
-              desc={`v${updateInfo?.currentVersion ?? '-'}`}
-            >
+            <SettingRow label="当前版本" desc="本地应用版本">
               <span className="text-sm font-mono">{updateInfo?.currentVersion ?? '-'}</span>
             </SettingRow>
             <SettingRow
-              label="最新版本"
-              desc={updateInfo
-                ? updateInfo.isUpdateAvailable
-                  ? `发现新版本 v${updateInfo.latestVersion}`
-                  : '已是最新'
-                : isChecking ? '检查中...' : '未检查'}
+              label="远程版本"
+              desc={
+                updateInfo
+                  ? updateInfo.isUpdateAvailable
+                    ? `发现新版本`
+                    : '已是最新'
+                  : isChecking ? '检查中...' : '点击下方按钮检查'
+              }
             >
               <div className="flex items-center gap-2">
                 {updateInfo ? (
@@ -266,10 +265,7 @@ export default function SettingsPage() {
                 )}
               </div>
             </SettingRow>
-            <SettingRow label="上次检查" desc="" last={false}>
-              {null}
-            </SettingRow>
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end">
               <Button
                 size="sm"
                 variant="outline"
