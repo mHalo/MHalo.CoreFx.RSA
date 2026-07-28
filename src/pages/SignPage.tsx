@@ -102,7 +102,7 @@ export default function SignPage() {
 
       <Toolbar className="justify-center">
         {processing && (
-          <div className="flex w-full items-center justify-center gap-2 rounded-full bg-muted py-1.5 text-[11px] text-muted-foreground md:w-auto md:px-3">
+          <div className="flex w-full items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground md:w-auto md:px-3">
             <Loader2 className="h-3 w-3 animate-spin" />
             处理中…
           </div>

@@ -131,7 +131,7 @@ export default function CryptPage() {
         {/* 操作列 */}
         <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 px-1 md:w-36 md:flex-col ">
           {processing && (
-            <div className="flex w-full items-center justify-center gap-2 rounded-full bg-muted py-1.5 text-[11px] text-muted-foreground md:mb-1">
+            <div className="flex w-full items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground md:mb-1">
               <Loader2 className="h-3 w-3 animate-spin" />
               处理中…
             </div>
