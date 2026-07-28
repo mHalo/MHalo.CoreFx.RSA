@@ -119,9 +119,13 @@ export default function CryptPage() {
       <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr]">
         {/* 原文 */}
         <div className="flex flex-col overflow-hidden rounded-xl bg-amber-500/5 dark:border dark:border-border shadow">
-          <div className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-800/10 text-[13px] font-medium text-muted-foreground">
-            <FileText className="h-3.5 w-3.5" />
-            原文
+          <div className="flex items-center justify-between bg-amber-800/10 px-4 py-2.5">
+            <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" />
+              原文
+            </span>
+            {/* 占位：与结果面板 header 中的 CopyButton 高度对齐 */}
+            <div className="h-7" />
           </div>
           <div className="flex-1 px-4 py-3">
             <textarea
@@ -135,13 +139,7 @@ export default function CryptPage() {
         </div>
 
         {/* 操作列 */}
-        <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 px-1 md:w-36 md:flex-col ">
-          {processing && (
-            <div className="flex w-full items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground md:mb-1">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              处理中…
-            </div>
-          )}
+        <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 px-1 md:w-28 md:flex-col ">
           {opButton('pub-enc', '公钥加密', <Lock />, 'encryptPublic', handleEncrypt)}
           {opButton('pri-dec', '私钥解密', <LockOpen />, 'decryptPrivate', handleDecrypt)}
           <Button
@@ -165,9 +163,17 @@ export default function CryptPage() {
               <CheckCircle2 className="h-3.5 w-3.5" />
               结果
             </span>
-            {resultText && <CopyButton text={resultText} />}
+            <div className="flex h-7 items-center">
+              {resultText && <CopyButton text={resultText} />}
+            </div>
           </div>
           <div className="flex-1 px-4 py-3">
+            {processing && (
+              <div className="mb-3 flex items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                处理中…
+              </div>
+            )}
             <textarea
               value={resultText}
               readOnly
