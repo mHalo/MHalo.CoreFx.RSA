@@ -10,7 +10,7 @@ export function Toolbar({ children, className }: ToolbarProps) {
   return (
     <div
       className={cn(
-        'mb-5 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl bg-card px-5 py-3',
+        'mb-5 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl bg-card px-5 py-3 dark:border dark:border-border',
         className
       )}
     >
