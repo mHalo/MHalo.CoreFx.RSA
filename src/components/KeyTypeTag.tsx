@@ -17,8 +17,15 @@ const config: Record<RSAKeyType, { label: string; className: string }> = {
   }
 }
 
-export function KeyTypeTag({ type }: { type: RSAKeyType | null }) {
-  if (type === null) return null
+export function KeyTypeTag({ type, detectFailed = false }: { type: RSAKeyType | null; detectFailed?: boolean }) {
+  if (type === null && !detectFailed) return null
+  if (type === null) {
+    return (
+      <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-destructive">
+        无法识别
+      </Badge>
+    )
+  }
   const { label, className } = config[type]
   return (
     <Badge variant="outline" className={className}>

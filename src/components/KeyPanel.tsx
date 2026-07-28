@@ -14,6 +14,7 @@ interface KeyPanelProps {
   readOnly?: boolean
   rows?: number
   keyType?: RSAKeyType | null
+  detectFailed?: boolean
   footerLeft?: ReactNode
   className?: string
 }
@@ -27,6 +28,7 @@ export function KeyPanel({
   readOnly = false,
   rows = 6,
   keyType,
+  detectFailed = false,
   footerLeft,
   className
 }: KeyPanelProps) {
@@ -38,7 +40,7 @@ export function KeyPanel({
           {title}
         </span>
         <span className="flex items-center gap-1">
-          {keyType !== undefined && <KeyTypeTag type={keyType} />}
+          {keyType !== undefined && <KeyTypeTag type={keyType} detectFailed={detectFailed} />}
           {readOnly && value && <CopyButton text={value} />}
         </span>
       </div>

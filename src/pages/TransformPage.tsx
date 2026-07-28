@@ -34,6 +34,7 @@ export default function TransformPage() {
 
   const [inputPrivateKey, setInputPrivateKey] = useState('')
   const [inputPrivateKeyType, setInputPrivateKeyType] = useState<RSAKeyType | null>(null)
+  const [detectFailed, setDetectFailed] = useState(false)
   const detectRef = useRef(0)
 
   // 输入变化时自动检测私钥格式（debounce 300ms，避免频繁调用WASM）
@@ -41,15 +42,19 @@ export default function TransformPage() {
     const token = ++detectRef.current
     if (!inputPrivateKey) {
       setInputPrivateKeyType(null)
+      setDetectFailed(false)
       return
     }
     const timer = setTimeout(async () => {
       // 只有最新的请求才更新状态
       if (token !== detectRef.current) return
       try {
-        setInputPrivateKeyType(await detectKeyType(inputPrivateKey, true))
+        const detected = await detectKeyType(inputPrivateKey, true)
+        setInputPrivateKeyType(detected)
+        setDetectFailed(detected === null)
       } catch {
         setInputPrivateKeyType(null)
+        setDetectFailed(true)
       }
     }, 300)
     return () => clearTimeout(timer)
@@ -97,6 +102,7 @@ export default function TransformPage() {
         rows={6}
         placeholder="请输入私钥（支持自动识别格式）"
         keyType={inputPrivateKeyType}
+        detectFailed={detectFailed}
         className="mb-4"
       />
 
