@@ -111,8 +111,8 @@ export default function Layout() {
   return (
     <div className="flex h-screen flex-col bg-background border-t border-border">
       {/* Body */}
-      <div className="flex flex-1 min-h-0">
-        <aside className="flex w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
+      <div className="flex flex-1 min-h-0 p-3">
+        <aside className="flex w-56 shrink-0 flex-col rounded-xl bg-sidebar text-sidebar-foreground shadow-lg">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2.5">
               <img src="/logo.png" alt="RSA工具箱" className="h-7 w-7" />
