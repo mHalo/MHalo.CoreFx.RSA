@@ -21,6 +21,7 @@ import { CipherAlgorithm, SignerAlgorithm } from '@/types/rsa'
 import { useSettingsStore, type ThemeColor } from '@/stores/settingsStore'
 import { useUpdateStore } from '@/stores/updateStore'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 const cipherOptions = [
   { label: 'RSA/ECB/PKCS1Padding', value: CipherAlgorithm.RSA_ECB_PKCS1Padding },
@@ -234,7 +235,16 @@ export default function SettingsPage() {
                 variant="outline"
                 className="h-7 text-xs"
                 disabled={isChecking}
-                onClick={() => check()}
+                onClick={async () => {
+                  const result = await check(true)
+                  if (result?.isUpdateAvailable) {
+                    toast.success(`发现新版本 v${result.latestVersion}`)
+                  } else if (result) {
+                    toast.success('已是最新版本')
+                  } else {
+                    toast.error('检查失败，请稍后重试')
+                  }
+                }}
               >
                 {isChecking ? '检查中...' : '检查更新'}
               </Button>
@@ -244,6 +254,7 @@ export default function SettingsPage() {
           <CardContent>
             <SettingRow
               label="当前版本"
+              last={true}
               desc={
                 updateInfo
                   ? updateInfo.isUpdateAvailable

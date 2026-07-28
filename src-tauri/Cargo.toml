@@ -25,3 +25,7 @@ tauri = { version = "2.11.3", features = [] }
 tauri-plugin-log = "2"
 dirs = "5"
 opener = "0.7"
+reqwest = { version = "0.12", features = ["stream"] }
+tokio = { version = "1", features = ["fs", "sync"] }
+tempfile = "3"
+futures-util = "0.3"

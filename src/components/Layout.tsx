@@ -7,7 +7,8 @@ import {
   ArrowLeftRight,
   Settings,
   Moon,
-  Sun
+  Sun,
+  ArrowUpCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useKeyStore } from '@/stores/keyStore'
@@ -15,6 +16,8 @@ import { useSettingsStore, themeColorVars } from '@/stores/settingsStore'
 import { Separator } from '@/components/ui/separator'
 import { Toaster } from '@/components/ui/sonner'
 import { useUpdateStore } from '@/stores/updateStore'
+import UpdateDialog from '@/components/UpdateDialog'
+import { useState } from 'react'
 
 const toolNav = [
   { to: '/generate', label: '密钥生成', icon: KeyRound },
@@ -123,6 +126,10 @@ export default function Layout() {
   const setIsDark = useSettingsStore((s) => s.setIsDark)
   const radius = useSettingsStore((s) => s.radius)
   const themeColor = useSettingsStore((s) => s.themeColor)
+  const currentVersion = useUpdateStore((s) => s.updateInfo?.currentVersion)
+  const hasUpdate = useUpdateStore((s) => s.hasUpdate)
+  const updateInfo = useUpdateStore((s) => s.updateInfo)
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
@@ -155,7 +162,18 @@ export default function Layout() {
               <img src="/logo.png" alt="RSA工具箱" className="h-7 w-7" />
               <div>
                 <div className="text-[13px] font-semibold leading-tight">RSA工具箱</div>
-                <div className="text-[11px] text-muted-foreground">跨平台版</div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span>v{currentVersion ?? '-'}</span>
+                  {hasUpdate && (
+                    <button
+                      onClick={() => setUpdateDialogOpen(true)}
+                      className="cursor-pointer"
+                      title="下载最新版本"
+                    >
+                      <ArrowUpCircle className="h-3 w-3 text-blue-500" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
             <button
@@ -186,6 +204,15 @@ export default function Layout() {
       </div>
 
       <Toaster position="top-center" />
+
+      {/* 更新弹窗 */}
+      {updateInfo && (
+        <UpdateDialog
+          open={updateDialogOpen}
+          onClose={() => setUpdateDialogOpen(false)}
+          updateInfo={updateInfo}
+        />
+      )}
     </div>
   )
 }

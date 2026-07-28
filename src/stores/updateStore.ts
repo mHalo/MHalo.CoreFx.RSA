@@ -6,7 +6,7 @@ interface UpdateState {
   isChecking: boolean
   hasUpdate: boolean
 
-  checkForUpdate: () => Promise<void>
+  checkForUpdate: (forceRefresh?: boolean) => Promise<CheckResult | null>
 }
 
 export const useUpdateStore = create<UpdateState>((set) => ({
@@ -14,10 +14,13 @@ export const useUpdateStore = create<UpdateState>((set) => ({
   isChecking: false,
   hasUpdate: false,
 
-  checkForUpdate: async () => {
+  checkForUpdate: async (forceRefresh = false) => {
     set({ isChecking: true })
     try {
-      const result = await checkForUpdate()
+      // 最低延迟确保用户能看到"检查中..."反馈
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 600))
+      const resultPromise = checkForUpdate(forceRefresh)
+      const [result] = await Promise.all([resultPromise, minDelay])
       if (result) {
         set({
           updateInfo: result,
@@ -27,8 +30,10 @@ export const useUpdateStore = create<UpdateState>((set) => ({
       } else {
         set({ isChecking: false })
       }
+      return result
     } catch {
       set({ isChecking: false })
+      return null
     }
   }
 }))

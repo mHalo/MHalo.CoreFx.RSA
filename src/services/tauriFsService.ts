@@ -3,9 +3,10 @@
  * 仅在 Tauri 环境下可用，浏览器 dev 模式下降级为 no-op。
  */
 
+import { invoke as tauriInvoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
+
 async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
-  // Dynamic import so Vite doesn't fail when @tauri-apps/api is unavailable (browser dev)
-  const { invoke: tauriInvoke } = await import('@tauri-apps/api/core')
   return tauriInvoke<T>(cmd, args)
 }
 
@@ -36,4 +37,26 @@ export async function saveKeyFile(filePath: string, content: string): Promise<bo
 export async function openFolder(path: string): Promise<boolean> {
   const result = await safeInvoke('open_folder', { path })
   return result !== null
+}
+
+/**
+ * 下载更新安装包到本地并打开。
+ * 返回 Rust 端的成功消息，失败返回 null。
+ * 进度通过 Tauri 事件 `update-download-progress` 发送。
+ */
+export async function downloadUpdate(url: string): Promise<string | null> {
+  return safeInvoke<string>('download_update', { url })
+}
+
+/**
+ * 监听下载进度事件。
+ * 返回取消监听的函数。
+ */
+export function onDownloadProgress(
+  callback: (payload: { downloaded: number; total: number }) => void
+): Promise<() => void> {
+  return listen<{ downloaded: number; total: number }>(
+    'update-download-progress',
+    (event) => callback(event.payload)
+  )
 }
