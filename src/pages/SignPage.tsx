@@ -73,8 +73,6 @@ export default function SignPage() {
     }
   }
 
-  const copyText = signatureResult || (verifyResult !== null ? (verifyResult ? '验证通过' : '验证失败') : '')
-
   return (
     <div className="animate-fade-in-up stagger-children">
       <PageHeader title="签名 / 验签" description="使用私钥签名数据、使用公钥验证签名完整性" />
@@ -161,10 +159,10 @@ export default function SignPage() {
               结果 / 签名
             </span>
             <div className="flex h-7 items-center">
-              {copyText && <CopyButton text={copyText} />}
+              {signatureResult && <CopyButton text={signatureResult} />}
             </div>
           </div>
-          <div className="flex-1 px-4 py-3">
+          <div className="flex flex-col flex-1 px-4 py-3">
             {/* 处理中指示器 */}
             {processing && (
               <div className="mb-3 flex items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground">
@@ -172,32 +170,29 @@ export default function SignPage() {
                 处理中…
               </div>
             )}
-            {signatureResult && verifyResult === null ? (
-              <textarea
-                value={signatureResult}
-                readOnly
-                rows={8}
-                className="h-full w-full resize-none rounded-xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none"
-              />
-            ) : verifyResult !== null ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
+            <textarea
+              value={signatureResult}
+              onChange={(e) => setSignatureResult(e.target.value)}
+              rows={8}
+              placeholder="签名结果将显示在这里，也可手动粘贴签名进行验签"
+              className="w-full resize-none rounded-xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none placeholder:text-muted-foreground"
+            />
+            {/* 验签结果 */}
+            {verifyResult !== null && !processing && (
+              <div className="mt-3 flex items-center gap-2.5 rounded-lg bg-muted/60 px-3 py-2.5">
                 {verifyResult ? (
-                  <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+                  <>
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                    <span className="text-[13px] font-medium text-emerald-600 dark:text-emerald-400">验证通过</span>
+                    <span className="text-[12px] text-muted-foreground">— 签名与数据匹配</span>
+                  </>
                 ) : (
-                  <XCircle className="h-12 w-12 text-destructive" />
+                  <>
+                    <XCircle className="h-4 w-4 shrink-0 text-destructive" />
+                    <span className="text-[13px] font-medium text-destructive">验证失败</span>
+                    <span className="text-[12px] text-muted-foreground">— 签名与数据不匹配，请检查输入</span>
+                  </>
                 )}
-                <div
-                  className={`mt-3.5 text-[17px] font-semibold ${verifyResult ? 'text-emerald-600 dark:text-emerald-500' : 'text-destructive'}`}
-                >
-                  {verifyResult ? '验证通过' : '验证失败'}
-                </div>
-                <div className="mt-1.5 text-[13px] text-muted-foreground">
-                  {verifyResult ? '签名与数据匹配' : '签名与数据不匹配，请检查输入'}
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-full items-center justify-center py-8 text-[13px] text-muted-foreground">
-                签名或验签结果将显示在这里
               </div>
             )}
           </div>
