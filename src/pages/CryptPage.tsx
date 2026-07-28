@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/PageHeader'
 import { KeyPanel } from '@/components/KeyPanel'
 import { CopyButton } from '@/components/CopyButton'
-import { CipherAlgorithm } from '@/types/rsa'
+import { useSettingsStore } from '@/stores/settingsStore'
 import {
   encrypt,
   decrypt,
@@ -27,7 +27,7 @@ export default function CryptPage() {
   const [plainText, setPlainText] = useState('')
   const [resultText, setResultText] = useState('')
   const [processing, setProcessing] = useState<Op | null>(null)
-  const cipherAlgorithm = CipherAlgorithm.RSA_ECB_PKCS1Padding
+  const cipherAlgorithm = useSettingsStore.getState().defaultCipher
 
   async function run(op: Op, fn: () => Promise<string>) {
     setProcessing(op)

@@ -1,10 +1,10 @@
 import { Toaster as Sonner } from 'sonner'
-import { useKeyStore } from '@/stores/keyStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const isDark = useKeyStore((s) => s.isDark)
+  const isDark = useSettingsStore((s) => s.isDark)
   return (
     <Sonner
       theme={isDark ? 'dark' : 'light'}

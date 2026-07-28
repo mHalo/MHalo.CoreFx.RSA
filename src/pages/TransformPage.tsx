@@ -15,6 +15,7 @@ import { KeyPanel } from '@/components/KeyPanel'
 import { KeyTypeTag } from '@/components/KeyTypeTag'
 import { RSAKeyType } from '@/types/rsa'
 import { transformPrivateKeyFormat, detectKeyType } from '@/services/wasmRsaService'
+import { useSettingsStore } from '@/stores/settingsStore'
 
 const keyTypeOptions = [
   { label: 'Pkcs1', value: RSAKeyType.Pkcs1 },
@@ -28,7 +29,7 @@ const formatOptions = [
 
 export default function TransformPage() {
   const [targetPrivateType, setTargetPrivateType] = useState<RSAKeyType>(RSAKeyType.Pkcs8)
-  const [outputFormat, setOutputFormat] = useState<'pem' | 'txt'>('pem')
+  const [outputFormat, setOutputFormat] = useState<'pem' | 'txt'>(useSettingsStore.getState().defaultKeyFormat)
   const [processing, setProcessing] = useState(false)
 
   const [inputPrivateKey, setInputPrivateKey] = useState('')

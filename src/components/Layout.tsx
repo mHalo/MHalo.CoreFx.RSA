@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useKeyStore } from '@/stores/keyStore'
+import { useSettingsStore, themeColorVars } from '@/stores/settingsStore'
 import { Separator } from '@/components/ui/separator'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -81,12 +82,31 @@ function WasmStatus() {
 }
 
 export default function Layout() {
-  const isDark = useKeyStore((s) => s.isDark)
-  const setIsDark = useKeyStore((s) => s.setIsDark)
+  const isDark = useSettingsStore((s) => s.isDark)
+  const setIsDark = useSettingsStore((s) => s.setIsDark)
+  const radius = useSettingsStore((s) => s.radius)
+  const themeColor = useSettingsStore((s) => s.themeColor)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
   }, [isDark])
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.setProperty('--radius', `${radius}rem`)
+  }, [radius])
+
+  useEffect(() => {
+    const root = document.documentElement
+    const vars = themeColorVars[themeColor]
+    const mode = isDark ? 1 : 0
+    root.style.setProperty('--primary', vars.primary[mode])
+    root.style.setProperty('--primary-foreground', vars.primaryForeground[mode])
+    root.style.setProperty('--ring', vars.ring[mode])
+    root.style.setProperty('--sidebar-primary', vars.sidebarPrimary[mode])
+    root.style.setProperty('--sidebar-primary-foreground', vars.sidebarPrimaryForeground[mode])
+    root.style.setProperty('--sidebar-ring', vars.sidebarRing[mode])
+  }, [themeColor, isDark])
 
   return (
     <div className="flex h-screen bg-background">

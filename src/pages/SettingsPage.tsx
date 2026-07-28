@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Palette, Zap, SlidersHorizontal } from 'lucide-react'
 import {
   Card,
@@ -18,7 +17,7 @@ import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { PageHeader } from '@/components/PageHeader'
 import { CipherAlgorithm, SignerAlgorithm } from '@/types/rsa'
-import { useKeyStore } from '@/stores/keyStore'
+import { useSettingsStore, type ThemeColor } from '@/stores/settingsStore'
 
 const cipherOptions = [
   { label: 'RSA/ECB/PKCS1Padding', value: CipherAlgorithm.RSA_ECB_PKCS1Padding },
@@ -31,6 +30,22 @@ const signerOptions = [
   { label: 'SHA384withRSA', value: SignerAlgorithm.SHA384withRSA },
   { label: 'SHA512withRSA', value: SignerAlgorithm.SHA512withRSA },
   { label: 'MD5withRSA', value: SignerAlgorithm.MD5withRSA }
+]
+const keyFormatOptions = [
+  { label: 'TXT', value: 'txt' },
+  { label: 'PEM', value: 'pem' }
+]
+const radiusOptions = [
+  { label: '直角', value: 0 },
+  { label: '小', value: 0.25 },
+  { label: '默认', value: 0.45 },
+  { label: '大', value: 0.75 }
+]
+const themeColorOptions: { label: string; value: ThemeColor; swatch: string }[] = [
+  { label: '青柠绿', value: 'lime', swatch: 'oklch(0.78 0.24 130.85)' },
+  { label: '靛蓝', value: 'indigo', swatch: 'oklch(0.51 0.19 263)' },
+  { label: '天蓝', value: 'sky', swatch: 'oklch(0.62 0.16 230)' },
+  { label: '玫红', value: 'rose', swatch: 'oklch(0.6 0.2 15)' }
 ]
 
 function SettingRow({
@@ -59,16 +74,11 @@ function SettingRow({
 }
 
 export default function SettingsPage() {
-  const isDark = useKeyStore((s) => s.isDark)
-  const setIsDark = useKeyStore((s) => s.setIsDark)
-
-  const [defaultCipher, setDefaultCipher] = useState<CipherAlgorithm>(CipherAlgorithm.RSA_ECB_PKCS1Padding)
-  const [defaultSigner, setDefaultSigner] = useState<SignerAlgorithm>(SignerAlgorithm.SHA256withRSA)
-  const [autoCopyPublicKey, setAutoCopyPublicKey] = useState(false)
+  const s = useSettingsStore()
 
   return (
     <div className="animate-fade-in-up stagger-children">
-      <PageHeader title="设置" description="外观与默认算法偏好" />
+      <PageHeader title="设置" description="外观与默认算法偏好（自动保存到本地）" />
 
       <div className="max-w space-y-5">
         <Card>
@@ -77,11 +87,43 @@ export default function SettingsPage() {
               <Palette className="h-4 w-4" />
               外观
             </CardTitle>
-            <CardDescription>界面主题相关设置</CardDescription>
+            <CardDescription>界面主题与风格相关设置</CardDescription>
           </CardHeader>
           <CardContent>
-            <SettingRow label="深色主题" desc="切换应用整体为深色模式" last>
-              <Switch checked={isDark} onCheckedChange={setIsDark} />
+            <SettingRow label="深色主题" desc="切换应用整体为深色模式">
+              <Switch checked={s.isDark} onCheckedChange={s.setIsDark} />
+            </SettingRow>
+            <SettingRow label="主题配色" desc="主按钮、强调色与侧边栏图标的颜色">
+              <div className="flex gap-2">
+                {themeColorOptions.map((o) => (
+                  <button
+                    key={o.value}
+                    onClick={() => s.setThemeColor(o.value)}
+                    aria-label={o.label}
+                    title={o.label}
+                    className={`h-7 w-7 rounded-full transition-all ${
+                      s.themeColor === o.value
+                        ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background scale-110'
+                        : 'hover:scale-110 opacity-80 hover:opacity-100'
+                    }`}
+                    style={{ backgroundColor: o.swatch }}
+                  />
+                ))}
+              </div>
+            </SettingRow>
+            <SettingRow label="界面圆角" desc="卡片、按钮、输入框的圆角大小" last>
+              <Select value={String(s.radius)} onValueChange={(v) => s.setRadius(Number(v))}>
+                <SelectTrigger className="w-28">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {radiusOptions.map((o) => (
+                    <SelectItem key={o.value} value={String(o.value)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </SettingRow>
           </CardContent>
         </Card>
@@ -92,13 +134,30 @@ export default function SettingsPage() {
               <SlidersHorizontal className="h-4 w-4" />
               默认选项
             </CardTitle>
-            <CardDescription>各页面的默认选中算法</CardDescription>
+            <CardDescription>各页面的默认选中项</CardDescription>
           </CardHeader>
           <CardContent>
+            <SettingRow label="默认密钥格式" desc="密钥生成与格式转换页面的默认输出格式">
+              <Select
+                value={s.defaultKeyFormat}
+                onValueChange={(v) => s.setDefaultKeyFormat(v as 'pem' | 'txt')}
+              >
+                <SelectTrigger className="w-28">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {keyFormatOptions.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </SettingRow>
             <SettingRow label="默认加密算法" desc="加密页面的默认选中算法">
               <Select
-                value={String(defaultCipher)}
-                onValueChange={(v) => setDefaultCipher(Number(v) as CipherAlgorithm)}
+                value={String(s.defaultCipher)}
+                onValueChange={(v) => s.setDefaultCipher(Number(v) as CipherAlgorithm)}
               >
                 <SelectTrigger className="w-96">
                   <SelectValue />
@@ -114,8 +173,8 @@ export default function SettingsPage() {
             </SettingRow>
             <SettingRow label="默认签名算法" desc="签名页面的默认选中算法" last>
               <Select
-                value={String(defaultSigner)}
-                onValueChange={(v) => setDefaultSigner(Number(v) as SignerAlgorithm)}
+                value={String(s.defaultSigner)}
+                onValueChange={(v) => s.setDefaultSigner(Number(v) as SignerAlgorithm)}
               >
                 <SelectTrigger className="w-96">
                   <SelectValue />
@@ -142,7 +201,7 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <SettingRow label="生成后自动复制公钥" desc="密钥生成成功后自动将公钥复制到剪贴板" last>
-              <Switch checked={autoCopyPublicKey} onCheckedChange={setAutoCopyPublicKey} />
+              <Switch checked={s.autoCopyPublicKey} onCheckedChange={s.setAutoCopyPublicKey} />
             </SettingRow>
           </CardContent>
         </Card>

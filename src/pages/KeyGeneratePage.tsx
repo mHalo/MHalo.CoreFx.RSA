@@ -17,6 +17,7 @@ import { KeyTypeTag } from '@/components/KeyTypeTag'
 import { RSAKeyType } from '@/types/rsa'
 import { generateKeyPair } from '@/services/wasmRsaService'
 import { useKeyStore } from '@/stores/keyStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 
 const keySizeOptions = [1024, 2048, 3072, 4096]
 const keyTypeOptions = [
@@ -35,7 +36,7 @@ export default function KeyGeneratePage() {
 
   const [keySize, setKeySize] = useState(2048)
   const [keyType, setKeyType] = useState<RSAKeyType>(RSAKeyType.Pkcs8)
-  const [formatType, setFormatType] = useState<'pem' | 'txt'>('pem')
+  const [formatType, setFormatType] = useState<'pem' | 'txt'>(useSettingsStore.getState().defaultKeyFormat)
   const [generating, setGenerating] = useState(false)
   const [publicKey, setPublicKey] = useState('')
   const [privateKey, setPrivateKey] = useState('')
@@ -50,7 +51,12 @@ export default function KeyGeneratePage() {
       const result = await generateKeyPair(keyType, keySize, formatType === 'pem')
       setPublicKey(result.publicKey)
       setPrivateKey(result.privateKey)
-      toast.success('密钥生成成功')
+      if (useSettingsStore.getState().autoCopyPublicKey) {
+        await navigator.clipboard.writeText(result.publicKey).catch(() => {})
+        toast.success('密钥生成成功，公钥已复制')
+      } else {
+        toast.success('密钥生成成功')
+      }
     } catch {
       toast.error('密钥生成失败')
     } finally {

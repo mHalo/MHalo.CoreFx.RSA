@@ -17,6 +17,7 @@ import { CopyButton } from '@/components/CopyButton'
 import { SignerAlgorithm } from '@/types/rsa'
 import { sign, verify } from '@/services/wasmRsaService'
 import { useKeyStore } from '@/stores/keyStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 
 const signerOptions = [
   { label: 'SHA1withRSA', value: SignerAlgorithm.SHA1withRSA },
@@ -37,7 +38,7 @@ export default function SignPage() {
   const [plainText, setPlainText] = useState('')
   const [signatureResult, setSignatureResult] = useState('')
   const [verifyResult, setVerifyResult] = useState<boolean | null>(null)
-  const [signerAlgorithm, setSignerAlgorithm] = useState<SignerAlgorithm>(SignerAlgorithm.SHA256withRSA)
+  const [signerAlgorithm, setSignerAlgorithm] = useState<SignerAlgorithm>(useSettingsStore.getState().defaultSigner)
   const [processing, setProcessing] = useState<'sign' | 'verify' | null>(null)
 
   async function handleSign() {
@@ -138,7 +139,7 @@ export default function SignPage() {
       <div className="grid gap-4 md:grid-cols-2">
         {/* 原文 */}
         <div className="flex flex-col overflow-hidden rounded-xl bg-amber-500/5 dark:border dark:border-border">
-          <div className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium text-muted-foreground">
+          <div className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-800/10 text-[13px] font-medium text-muted-foreground">
             <FileText className="h-3.5 w-3.5" />
             原文 / 数据
           </div>
@@ -155,7 +156,7 @@ export default function SignPage() {
 
         {/* 结果 */}
         <div className="flex flex-col overflow-hidden rounded-xl bg-emerald-500/5 dark:border dark:border-border">
-          <div className="flex items-center justify-between  px-4 py-2.5">
+          <div className="flex items-center justify-between bg-emerald-800/10 px-4 py-2.5">
             <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
               <CheckCircle2 className="h-3.5 w-3.5" />
               结果 / 签名
