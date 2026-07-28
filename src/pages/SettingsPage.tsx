@@ -1,4 +1,5 @@
-import { Palette, Zap, SlidersHorizontal } from 'lucide-react'
+import { Palette, Zap, SlidersHorizontal, Info } from 'lucide-react'
+import { useEffect } from 'react'
 import {
   Card,
   CardContent,
@@ -18,6 +19,8 @@ import { Separator } from '@/components/ui/separator'
 import { PageHeader } from '@/components/PageHeader'
 import { CipherAlgorithm, SignerAlgorithm } from '@/types/rsa'
 import { useSettingsStore, type ThemeColor } from '@/stores/settingsStore'
+import { useUpdateStore } from '@/stores/updateStore'
+import { Button } from '@/components/ui/button'
 
 const cipherOptions = [
   { label: 'RSA/ECB/PKCS1Padding', value: CipherAlgorithm.RSA_ECB_PKCS1Padding },
@@ -75,6 +78,13 @@ function SettingRow({
 
 export default function SettingsPage() {
   const s = useSettingsStore()
+  const updateInfo = useUpdateStore((st) => st.updateInfo)
+  const isChecking = useUpdateStore((st) => st.isChecking)
+  const check = useUpdateStore((st) => st.checkForUpdate)
+
+  useEffect(() => {
+    check()
+  }, [check])
 
   return (
     <div className="animate-fade-in-up stagger-children">
@@ -209,6 +219,66 @@ export default function SettingsPage() {
             <SettingRow label="生成后自动复制公钥" desc="密钥生成成功后自动将公钥复制到剪贴板" last>
               <Switch checked={s.autoCopyPublicKey} onCheckedChange={s.setAutoCopyPublicKey} />
             </SettingRow>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Info className="h-4 w-4" />
+              关于与更新
+            </CardTitle>
+            <CardDescription>应用版本与更新检查</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SettingRow
+              label="当前版本"
+              desc={`v${updateInfo?.currentVersion ?? '-'}`}
+            >
+              <span className="text-sm font-mono">{updateInfo?.currentVersion ?? '-'}</span>
+            </SettingRow>
+            <SettingRow
+              label="最新版本"
+              desc={updateInfo
+                ? updateInfo.isUpdateAvailable
+                  ? `发现新版本 v${updateInfo.latestVersion}`
+                  : '已是最新'
+                : isChecking ? '检查中...' : '未检查'}
+            >
+              <div className="flex items-center gap-2">
+                {updateInfo ? (
+                  <>
+                    <span className={`h-2 w-2 rounded-full ${updateInfo.isUpdateAvailable ? 'bg-blue-500' : 'bg-emerald-500'}`} />
+                    <span className="text-sm font-mono">{updateInfo.latestVersion}</span>
+                    {updateInfo.isUpdateAvailable && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="ml-2 h-7 text-xs"
+                        onClick={() => window.open(updateInfo.latestUrl, '_blank')}
+                      >
+                        前往更新
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">-</span>
+                )}
+              </div>
+            </SettingRow>
+            <SettingRow label="上次检查" desc="" last={false}>
+              {null}
+            </SettingRow>
+            <div className="mt-4 flex justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isChecking}
+                onClick={() => check()}
+              >
+                {isChecking ? '检查中...' : '检查更新'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
