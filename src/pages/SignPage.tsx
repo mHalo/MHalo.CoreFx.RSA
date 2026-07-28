@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
 import { PageHeader } from '@/components/PageHeader'
 import { Toolbar, ToolbarField } from '@/components/Toolbar'
 import { KeyPanel } from '@/components/KeyPanel'
@@ -101,13 +100,8 @@ export default function SignPage() {
         />
       </div>
 
-      <Toolbar className="justify-center">
-        {processing && (
-          <div className="flex w-full items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground md:w-auto md:px-3">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            处理中…
-          </div>
-        )}
+      {/* Toolbar: 签名算法左对齐，按钮在右侧 */}
+      <Toolbar className="justify-between">
         <ToolbarField label="签名算法">
           <Select
             value={String(signerAlgorithm)}
@@ -125,23 +119,28 @@ export default function SignPage() {
             </SelectContent>
           </Select>
         </ToolbarField>
-        <Separator orientation="vertical" className="h-6" />
-        <Button size="sm" disabled={processing !== null} onClick={handleSign}>
-          {processing === 'sign' ? <Loader2 className="animate-spin" /> : <PenLine />}
-          私钥签名
-        </Button>
-        <Button size="sm" variant="secondary" disabled={processing !== null} onClick={handleVerify}>
-          {processing === 'verify' ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
-          公钥验签
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" disabled={processing !== null} onClick={handleSign}>
+            {processing === 'sign' ? <Loader2 className="animate-spin" /> : <PenLine />}
+            私钥签名
+          </Button>
+          <Button size="sm" variant="secondary" disabled={processing !== null} onClick={handleVerify}>
+            {processing === 'verify' ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
+            公钥验签
+          </Button>
+        </div>
       </Toolbar>
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* 原文 */}
         <div className="flex flex-col overflow-hidden rounded-xl bg-amber-500/5 dark:border dark:border-border">
-          <div className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-800/10 text-[13px] font-medium text-muted-foreground">
-            <FileText className="h-3.5 w-3.5" />
-            原文 / 数据
+          <div className="flex items-center justify-between bg-amber-800/10 px-4 py-2.5">
+            <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" />
+              原文 / 数据
+            </span>
+            {/* 占位：与结果面板 header 中的 CopyButton 高度对齐，保持两个面板 header 高度一致 */}
+            <div className="h-7" />
           </div>
           <div className="flex-1 px-4 py-3">
             <textarea
@@ -161,9 +160,18 @@ export default function SignPage() {
               <CheckCircle2 className="h-3.5 w-3.5" />
               结果 / 签名
             </span>
-            {copyText && <CopyButton text={copyText} />}
+            <div className="flex h-7 items-center">
+              {copyText && <CopyButton text={copyText} />}
+            </div>
           </div>
           <div className="flex-1 px-4 py-3">
+            {/* 处理中指示器 */}
+            {processing && (
+              <div className="mb-3 flex items-center justify-center gap-2 rounded-md bg-muted py-1.5 text-[11px] text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                处理中…
+              </div>
+            )}
             {signatureResult && verifyResult === null ? (
               <textarea
                 value={signatureResult}
