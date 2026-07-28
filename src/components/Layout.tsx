@@ -109,44 +109,43 @@ export default function Layout() {
   }, [themeColor, isDark])
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <aside className="flex w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary">
-              <KeyRound className="h-4 w-4 text-sidebar-primary-foreground" />
+    <div className="flex h-screen flex-col bg-background border-t border-border">
+      {/* Body */}
+      <div className="flex flex-1 min-h-0">
+        <aside className="flex w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="RSA工具箱" className="h-7 w-7" />
+              <div>
+                <div className="text-[13px] font-semibold leading-tight">RSA工具箱</div>
+                <div className="text-[11px] text-muted-foreground">跨平台版</div>
+              </div>
             </div>
-            <div>
-              <div className="text-[13px] font-semibold leading-tight">RSA ToolBox</div>
-              <div className="text-[11px] text-muted-foreground">跨平台版</div>
-            </div>
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              aria-label="切换深色模式"
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
           </div>
-          <button
-            onClick={() => setIsDark(!isDark)}
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            aria-label="切换深色模式"
-          >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
-        </div>
-        <Separator className="bg-sidebar-border" />
-        <div className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
-          <NavGroup title="工具" items={toolNav} />
-          <NavGroup title="系统" items={systemNav} />
-        </div>
-        <Separator className="bg-sidebar-border" />
-        <div className="px-4 py-3">
-          <WasmStatus />
-        </div>
-      </aside>
+          <Separator className="bg-sidebar-border" />
+          <div className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+            <NavGroup title="工具" items={toolNav} />
+            <NavGroup title="系统" items={systemNav} />
+          </div>
+          <Separator className="bg-sidebar-border" />
+          <div className="px-4 py-3">
+            <WasmStatus />
+          </div>
+        </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-9 py-7">
-          <Outlet />
-        </div>
-      </main>
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-6xl px-9 py-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
 
       <Toaster position="top-center" />
     </div>

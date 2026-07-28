@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, KeyRound, Loader2, Megaphone, RefreshCw } from 'lucide-react'
+import { ArrowRight, FolderOpen, KeyRound, Loader2, Megaphone, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,6 +18,7 @@ import { RSAKeyType } from '@/types/rsa'
 import { generateKeyPair } from '@/services/wasmRsaService'
 import { useKeyStore } from '@/stores/keyStore'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { getSavePath, saveKeyFile, openFolder } from '@/services/tauriFsService'
 
 const keySizeOptions = [1024, 2048, 3072, 4096]
 const keyTypeOptions = [
@@ -40,17 +41,30 @@ export default function KeyGeneratePage() {
   const [generating, setGenerating] = useState(false)
   const [publicKey, setPublicKey] = useState('')
   const [privateKey, setPrivateKey] = useState('')
+  const [savedPath, setSavedPath] = useState<string | null>(null)
 
   const formatLabel = formatType === 'pem' ? 'PEM' : 'TXT'
+  const fileSuffix = formatType === 'pem' ? '.pem' : '.txt'
 
   async function handleGenerate() {
     setGenerating(true)
+    setSavedPath(null)
     // Yield to browser so the loading overlay can paint before WASM blocks the main thread.
     await new Promise((resolve) => setTimeout(resolve, 50))
     try {
       const result = await generateKeyPair(keyType, keySize, formatType === 'pem', useSettingsStore.getState().strictKeySize)
       setPublicKey(result.publicKey)
       setPrivateKey(result.privateKey)
+
+      // 保存到本地桌面
+      const typeName = keyTypeOptions.find((o) => o.value === keyType)?.label ?? 'Key'
+      const folder = await getSavePath(typeName)
+      if (folder) {
+        await saveKeyFile(`${folder}/publicKey${fileSuffix}`, result.publicKey)
+        await saveKeyFile(`${folder}/privateKey${fileSuffix}`, result.privateKey)
+        setSavedPath(folder)
+      }
+
       if (useSettingsStore.getState().autoCopyPublicKey) {
         await navigator.clipboard.writeText(result.publicKey).catch(() => {})
         toast.success('密钥生成成功，公钥已复制')
@@ -159,6 +173,19 @@ export default function KeyGeneratePage() {
             footerLeft={privateKey ? footer : undefined}
           />
         </div>
+
+        {savedPath && (
+          <div className="mt-4 flex items-center justify-between rounded-xl bg-card px-4 py-3">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">保存位置：</span>
+              <span className="font-mono text-xs text-foreground">{savedPath}</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => openFolder(savedPath)}>
+              <FolderOpen />
+              打开文件夹
+            </Button>
+          </div>
+        )}
       </div>
 
       {publicKey && (

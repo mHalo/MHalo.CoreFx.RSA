@@ -14,6 +14,7 @@ interface SettingsState {
   defaultSigner: SignerAlgorithm
   autoCopyPublicKey: boolean
   strictKeySize: boolean
+  saveToLocal: boolean
   setIsDark: (value: boolean) => void
   setRadius: (value: number) => void
   setThemeColor: (value: ThemeColor) => void
@@ -22,6 +23,7 @@ interface SettingsState {
   setDefaultSigner: (value: SignerAlgorithm) => void
   setAutoCopyPublicKey: (value: boolean) => void
   setStrictKeySize: (value: boolean) => void
+  setSaveToLocal: (value: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -35,6 +37,7 @@ export const useSettingsStore = create<SettingsState>()(
       defaultSigner: SignerAlgorithm.SHA256withRSA,
       autoCopyPublicKey: false,
       strictKeySize: false,
+      saveToLocal: true,
       setIsDark: (value) => set({ isDark: value }),
       setRadius: (value) => set({ radius: value }),
       setThemeColor: (value) => set({ themeColor: value }),
@@ -42,7 +45,8 @@ export const useSettingsStore = create<SettingsState>()(
       setDefaultCipher: (value) => set({ defaultCipher: value }),
       setDefaultSigner: (value) => set({ defaultSigner: value }),
       setAutoCopyPublicKey: (value) => set({ autoCopyPublicKey: value }),
-      setStrictKeySize: (value) => set({ strictKeySize: value })
+      setStrictKeySize: (value) => set({ strictKeySize: value }),
+      setSaveToLocal: (value) => set({ saveToLocal: value })
     }),
     { name: 'rsatoolbox-settings' }
   )
