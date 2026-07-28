@@ -146,7 +146,7 @@ export default function Layout() {
   }, [themeColor, isDark])
 
   return (
-    <div className="flex h-screen flex-col bg-background border-t border-border">
+    <div className="flex h-screen flex-col bg-background">
       {/* Body */}
       <div className="flex flex-1 min-h-0 p-3">
         <aside className="flex w-56 shrink-0 flex-col rounded-xl bg-sidebar text-sidebar-foreground shadow-lg">
