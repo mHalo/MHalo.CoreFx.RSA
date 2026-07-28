@@ -1,61 +1,81 @@
 #!/bin/bash
 # Re-sign Tauri .app with proper ad-hoc signature that seals resources/Info.plist.
-# Tauri's Rust linker only signs the binary, leaving the bundle incomplete —
+# Tauri's Rust linker only signs the binary (linker-signed), leaving the bundle incomplete —
 # Gatekeeper rejects it ("code has no resources but signature indicates they must be present").
-# This script replaces the partial linker-signed signature with a proper ad-hoc one,
-# then replaces the DMG with the re-signed app.
+# This script extracts the .app from the built DMG, re-signs it, and re-creates the DMG.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-APP_DIR="$PROJECT_DIR/src-tauri/target/release/bundle/macos"
-DMG_DIR="$PROJECT_DIR/src-tauri/target/release/bundle/dmg"
+BUNDLE_DIR="$PROJECT_DIR/src-tauri/target/release/bundle"
+DMG_DIR="$BUNDLE_DIR/dmg"
+WORK_DIR="$PROJECT_DIR/src-tauri/target/release/bundle/_resign_work"
 
 echo "=== macos-resign.sh ==="
-echo "APP_DIR: $APP_DIR"
-echo "DMG_DIR: $DMG_DIR"
 
-# Find the .app
-APP=$(find "$APP_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
-if [ -z "$APP" ]; then
-  echo "ERROR: No .app found in $APP_DIR"
-  ls -la "$APP_DIR" || true
-  exit 1
+# Find the .app — check macos/ first, then inside DMG
+APP=""
+if [ -d "$BUNDLE_DIR/macos" ]; then
+  APP=$(find "$BUNDLE_DIR/macos" -maxdepth 1 -name "*.app" -type d | head -1)
 fi
-echo "Found app: $APP"
 
-# Remove quarantine attribute
-echo "Removing quarantine attribute..."
+if [ -z "$APP" ]; then
+  echo "No .app in bundle/macos, extracting from DMG..."
+  DMG_SRC=$(find "$DMG_DIR" -maxdepth 1 -name "*.dmg" -type f | head -1)
+  if [ -z "$DMG_SRC" ]; then
+    echo "ERROR: No DMG found in $DMG_DIR"
+    ls -la "$DMG_DIR" || true
+    exit 1
+  fi
+
+  rm -rf "$WORK_DIR"
+  mkdir -p "$WORK_DIR"
+  echo "Mounting $DMG_SRC"
+  hdiutil attach "$DMG_SRC" -mountpoint "$WORK_DIR/mount" -nobrowse -quiet
+
+  APP=$(find "$WORK_DIR/mount" -maxdepth 1 -name "*.app" -type d | head -1)
+  if [ -z "$APP" ]; then
+    echo "ERROR: No .app found inside DMG"
+    ls -la "$WORK_DIR/mount" || true
+    hdiutil detach "$WORK_DIR/mount" -quiet 2>/dev/null || true
+    exit 1
+  fi
+
+  echo "Found in DMG: $(basename "$APP")"
+  cp -R "$APP" "$WORK_DIR/app"
+  hdiutil detach "$WORK_DIR/mount" -quiet
+  APP="$WORK_DIR/app"
+else
+  echo "Found in macos/: $(basename "$APP")"
+fi
+
+# Remove quarantine before re-sign
+echo "Removing quarantine attributes..."
 xattr -cr "$APP" 2>/dev/null || true
 
-# Re-sign with proper ad-hoc signature
+# Re-sign with proper ad-hoc signature (seals Resources/Info.plist)
 echo "Re-signing with ad-hoc signature..."
 codesign --force --deep --sign - "$APP"
-echo "  Done re-signing."
+echo "Done."
 
-# Verify the new signature
-echo "Verifying new signature..."
-codesign -dvvv "$APP" 2>&1 | grep -E "Signature|Resources|linker" || true
+# Verify signature quality
+echo "Verifying signature..."
+codesign -dvvv "$APP" 2>&1 | grep -E "Signature|linker|Resources" | head -3
 
-# Locate the original DMG
-DMG_ORIG=$(find "$DMG_DIR" -maxdepth 1 -name "*.dmg" -type f | grep -v "_unsigned" | head -1)
+# Locate original DMG and re-create it
+DMG_ORIG=$(find "$DMG_DIR" -maxdepth 1 -name "*.dmg" -type f | head -1)
 if [ -z "$DMG_ORIG" ]; then
-  echo "ERROR: No DMG found in $DMG_DIR"
+  echo "ERROR: No DMG found to re-create"
   ls -la "$DMG_DIR" || true
   exit 1
 fi
 
 APP_NAME=$(basename "$APP" .app)
-echo "Original DMG:  $DMG_ORIG"
-echo "App name:      $APP_NAME"
-
-# Back up the original DMG
 DMG_BACKUP="${DMG_ORIG%.dmg}_unsigned.dmg"
-echo "Backing up:    $DMG_ORIG → $DMG_BACKUP"
+
+echo "Backing up: $(basename "$DMG_ORIG") → $(basename "$DMG_BACKUP")"
 mv "$DMG_ORIG" "$DMG_BACKUP"
 
-# Re-create DMG with the re-signed .app
-# Use -fs HFS+ to avoid APFS which can cause issues on older macOS
 echo "Creating DMG with re-signed app..."
 hdiutil create \
   -srcfolder "$APP" \
@@ -63,7 +83,10 @@ hdiutil create \
   -format "UDZO" \
   -fs "HFS+" \
   -ov \
-  "$DMG_ORIG"
+  "$DMG_ORIG" > /dev/null
 
-echo "=== Done: $DMG_ORIG is now re-signed ==="
+# Cleanup
+rm -rf "$WORK_DIR"
+
+echo "=== Done: $(basename "$DMG_ORIG") re-signed and ready ==="
 ls -lh "$DMG_ORIG"
