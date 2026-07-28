@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "RSA ToolBox",
+  "productName": "RSA工具箱",
   "version": "0.1.2",
   "identifier": "com.mhalo.rsa-toolbox",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "RSA ToolBox",
+        "title": "RSA工具箱",
         "width": 1200,
         "height": 800,
         "resizable": true
