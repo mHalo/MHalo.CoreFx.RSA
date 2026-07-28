@@ -9,10 +9,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={isDark ? 'dark' : 'light'}
       className="toaster group"
+      richColors
       toastOptions={{
         classNames: {
           toast:
-            'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
+            'group toast group-[.toaster]:border group-[.toaster]:shadow-lg',
           description: 'group-[.toast]:text-muted-foreground'
         }
       }}
