@@ -9,10 +9,10 @@ namespace RsaToolBox.Crossfrom.Core;
 public static partial class RsaInteropService
 {
     [JSExport]
-    public static string GenerateKeyPair(int keyType, int keySize, bool usePemFormat)
+    public static string GenerateKeyPair(int keyType, int keySize, bool usePemFormat, bool strictBitLength = false)
     {
         var (publicKey, privateKey) = RSAHelper.ExportRSAKey(
-            (RSAKeyType)keyType, keySize, usePemFormat);
+            (RSAKeyType)keyType, keySize, usePemFormat, strictBitLength);
         return new JsonObject
         {
             ["publicKey"] = publicKey,

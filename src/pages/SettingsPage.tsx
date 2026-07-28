@@ -154,6 +154,12 @@ export default function SettingsPage() {
                 </SelectContent>
               </Select>
             </SettingRow>
+            <SettingRow
+              label="密钥长度严格对齐"
+              desc="生成的模数位数严格等于选定长度（关闭时允许±1 bit偏差，几乎无安全影响，但生成更快）"
+            >
+              <Switch checked={s.strictKeySize} onCheckedChange={s.setStrictKeySize} />
+            </SettingRow>
             <SettingRow label="默认加密算法" desc="加密页面的默认选中算法">
               <Select
                 value={String(s.defaultCipher)}

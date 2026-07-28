@@ -30,12 +30,25 @@ namespace MHalo.CoreFx.Helper
         /// </summary>
         /// <param name="keySizeInBits">512/1024/2048/</param>
         /// <returns></returns>
-        public static AsymmetricCipherKeyPair Create(int keySizeInBits)
+        /// <summary>
+        /// 创建RSA密钥对 (BouncyCastle)
+        /// </summary>
+        /// <param name="keySizeInBits">512/1024/2048/</param>
+        /// <param name="strictBitLength">是否严格要求模数位数等于 keySizeInBits。
+        /// 默认 false：接受 BouncyCastle 原生输出（模数位数可能少 1 bit，安全影响可忽略）；
+        /// true：重试直到模数位数严格对齐（与 .NET RSA.Create(keySizeInBits) 行为一致），
+        /// 在 WASM 环境下可能需要更多耗时，内部限制最多重试 10 次以避免长时间阻塞。</param>
+        /// <returns></returns>
+        public static AsymmetricCipherKeyPair Create(int keySizeInBits, bool strictBitLength = false)
         {
             var generator = new RsaKeyPairGenerator();
             generator.Init(new KeyGenerationParameters(new SecureRandom(), keySizeInBits));
+            if (!strictBitLength)
+            {
+                return generator.GenerateKeyPair();
+            }
             AsymmetricCipherKeyPair keyPair;
-            // 尽量保证模数位数与 keySizeInBits 一致，但避免在 WASM/browser 中无限重试导致长时间阻塞
+            // 严格对齐模式下限制最多重试 10 次，避免在 WASM/browser 中无限重试导致长时间阻塞
             int attempts = 0;
             const int maxAttempts = 10;
             do
@@ -54,10 +67,10 @@ namespace MHalo.CoreFx.Helper
         /// <param name="keyType">密钥类型</param>
         /// <param name="keySizeInBits">长度</param>
         /// <param name="usePemFormat">是否使用pem格式,当密钥类型为Xml时，此参数不起效</param>
-        public static (string publicKey, string privateKey) ExportRSAKey(RSAKeyType keyType, int keySizeInBits, bool usePemFormat = false)
+        public static (string publicKey, string privateKey) ExportRSAKey(RSAKeyType keyType, int keySizeInBits, bool usePemFormat = false, bool strictBitLength = false)
         {
             string publicKey, privateKey;
-            AsymmetricCipherKeyPair keyPair = Create(keySizeInBits);
+            AsymmetricCipherKeyPair keyPair = Create(keySizeInBits, strictBitLength);
             var privateKeyParameter = (RsaPrivateCrtKeyParameters)keyPair.Private;
             var publicKeyParameter = (RsaKeyParameters)keyPair.Public;
             if (keyType == RSAKeyType.Xml)

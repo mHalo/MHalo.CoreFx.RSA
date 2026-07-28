@@ -1,54 +1,98 @@
+/**
+ * WASM RSA 服务 —— Web Worker RPC 代理
+ *
+ * 所有 .NET WASM 运行时位于独立的 Web Worker 中，通过 postMessage 进行异步调用。
+ * 本模块对外暴露的 API 签名与之前完全一致，页面代码无需任何改动。
+ */
+
 import type { CipherAlgorithm, RSAKeyPair, RSAKeyType, SignerAlgorithm } from '@/types/rsa'
 
-interface DotnetRuntime {
-  getConfig(): { mainAssemblyName: string }
-  getAssemblyExports(assemblyName: string): Promise<Record<string, unknown>>
+// ── Worker lifecycle ──────────────────────────────────────────────
+
+let worker: Worker | null = null
+let nextId = 0
+const pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>()
+let readyPromise: Promise<void> | null = null
+let ready = false
+
+function onWorkerMessage(e: MessageEvent) {
+  const { id, type, result, error } = e.data ?? {}
+
+  if (type === 'ready') {
+    ready = true
+    return
+  }
+
+  const handler = pending.get(id as number)
+  if (!handler) return
+  pending.delete(id as number)
+
+  if (error) {
+    handler.reject(new Error(error as string))
+  } else {
+    handler.resolve(result)
+  }
 }
 
-interface DotnetHost {
-  create(): Promise<DotnetRuntime>
-}
+function call(method: string, ...args: unknown[]): Promise<unknown> {
+  if (!worker || !ready) {
+    return Promise.reject(new Error('WASM worker not initialized. Call initializeRuntime() first.'))
+  }
 
-let exports: Record<string, (...args: unknown[]) => unknown> | null = null
-let initPromise: Promise<void> | null = null
+  const id = nextId++
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve, reject })
+    worker!.postMessage({ id, method, args })
+  })
+}
 
 export function initializeRuntime(): Promise<void> {
-  if (exports) return Promise.resolve()
-  // Guard against concurrent init (React StrictMode double-invokes effects in dev):
-  // reuse the in-flight promise so dotnet.create() is only called once.
-  if (initPromise) return initPromise
+  if (ready) return Promise.resolve()
+  if (readyPromise) return readyPromise
 
-  initPromise = (async () => {
-    // The .NET 9 WASM host module is pre-loaded in index.html via
-    // dotnet-global.ts, which imports dotnet.js and stashes the API on
-    // globalThis.__dotnetHost. This avoids dynamic import() which is
-    // incompatible with Vite's handling of non-source-dir modules.
-    const dotnet = (globalThis as unknown as { __dotnetHost: DotnetHost }).__dotnetHost
-    const runtime = await dotnet.create()
-    const config = runtime.getConfig()
-    const assemblyExports = await runtime.getAssemblyExports(config.mainAssemblyName)
-    let svc: Record<string, unknown> = assemblyExports.RsaToolBox as Record<string, unknown>
-    svc = svc.Crossfrom as Record<string, unknown>
-    svc = svc.Core as Record<string, unknown>
-    exports = svc.RsaInteropService as Record<string, (...args: unknown[]) => unknown>
-  })()
+  readyPromise = new Promise<void>((resolve, reject) => {
+    try {
+      // public/rsaWorker.js is served as a raw static file by Vite.
+      worker = new Worker('/rsaWorker.js', { type: 'module' })
 
-  // If init fails, allow retry by resetting the in-flight promise.
-  initPromise.catch(() => {
-    initPromise = null
+      worker.onmessage = (e: MessageEvent) => {
+        const data = e.data ?? {}
+        if (data.type === 'ready') {
+          ready = true
+          resolve()
+        } else {
+          onWorkerMessage(e)
+        }
+      }
+
+      worker.onerror = (err) => {
+        const message = err instanceof ErrorEvent ? err.message : 'Worker error'
+        readyPromise = null
+        reject(new Error(message))
+      }
+    } catch (err) {
+      readyPromise = null
+      reject(err)
+    }
   })
 
-  return initPromise
+  readyPromise.catch(() => {
+    readyPromise = null
+  })
+
+  return readyPromise
 }
+
+// ── Public API (unchanged signatures) ─────────────────────────────
 
 export async function generateKeyPair(
   type: RSAKeyType,
   keySize: number,
-  usePemFormat: boolean
+  usePemFormat: boolean,
+  strictBitLength = false
 ): Promise<RSAKeyPair> {
-  ensureExports()
-  const json = exports!.GenerateKeyPair(type, keySize, usePemFormat) as string
-  return JSON.parse(json) as RSAKeyPair
+  const json = await call('GenerateKeyPair', type, keySize, usePemFormat, strictBitLength)
+  return JSON.parse(json as string) as RSAKeyPair
 }
 
 export async function encrypt(
@@ -57,8 +101,7 @@ export async function encrypt(
   publicKey: string,
   algorithm: CipherAlgorithm
 ): Promise<string> {
-  ensureExports()
-  return exports!.Encrypt(type, plaintext, publicKey, algorithm) as string
+  return (await call('Encrypt', type, plaintext, publicKey, algorithm)) as string
 }
 
 export async function decrypt(
@@ -67,8 +110,7 @@ export async function decrypt(
   privateKey: string,
   algorithm: CipherAlgorithm
 ): Promise<string> {
-  ensureExports()
-  return exports!.Decrypt(type, ciphertext, privateKey, algorithm) as string
+  return (await call('Decrypt', type, ciphertext, privateKey, algorithm)) as string
 }
 
 export async function encryptByPrivateKey(
@@ -77,8 +119,7 @@ export async function encryptByPrivateKey(
   privateKey: string,
   algorithm: CipherAlgorithm
 ): Promise<string> {
-  ensureExports()
-  return exports!.EncryptByPrivateKey(type, plaintext, privateKey, algorithm) as string
+  return (await call('EncryptByPrivateKey', type, plaintext, privateKey, algorithm)) as string
 }
 
 export async function decryptByPublicKey(
@@ -87,8 +128,7 @@ export async function decryptByPublicKey(
   publicKey: string,
   algorithm: CipherAlgorithm
 ): Promise<string> {
-  ensureExports()
-  return exports!.DecryptByPublicKey(type, ciphertext, publicKey, algorithm) as string
+  return (await call('DecryptByPublicKey', type, ciphertext, publicKey, algorithm)) as string
 }
 
 export async function sign(
@@ -97,8 +137,7 @@ export async function sign(
   privateKey: string,
   algorithm: SignerAlgorithm
 ): Promise<string> {
-  ensureExports()
-  return exports!.Sign(type, data, privateKey, algorithm) as string
+  return (await call('Sign', type, data, privateKey, algorithm)) as string
 }
 
 export async function verify(
@@ -108,8 +147,7 @@ export async function verify(
   publicKey: string,
   algorithm: SignerAlgorithm
 ): Promise<boolean> {
-  ensureExports()
-  return exports!.Verify(type, data, signature, publicKey, algorithm) as boolean
+  return (await call('Verify', type, data, signature, publicKey, algorithm)) as boolean
 }
 
 export async function transformPublicKeyFormat(
@@ -117,8 +155,7 @@ export async function transformPublicKeyFormat(
   targetType: RSAKeyType,
   usePemFormat: boolean
 ): Promise<string> {
-  ensureExports()
-  return exports!.TransformPublicKeyFormat(publicKey, targetType, usePemFormat) as string
+  return (await call('TransformPublicKeyFormat', publicKey, targetType, usePemFormat)) as string
 }
 
 export async function transformPrivateKeyFormat(
@@ -126,20 +163,12 @@ export async function transformPrivateKeyFormat(
   targetType: RSAKeyType,
   usePemFormat: boolean
 ): Promise<{ success: boolean; publicKey: string; privateKey: string }> {
-  ensureExports()
-  const json = exports!.TransformPrivateKeyFormat(privateKey, targetType, usePemFormat) as string
-  return JSON.parse(json)
+  const json = await call('TransformPrivateKeyFormat', privateKey, targetType, usePemFormat)
+  return JSON.parse(json as string)
 }
 
 export async function detectKeyType(key: string, isPrivate: boolean): Promise<RSAKeyType | null> {
-  ensureExports()
-  const json = exports!.DetectKeyType(key, isPrivate) as string
-  const result = JSON.parse(json) as { type: number | null }
+  const json = await call('DetectKeyType', key, isPrivate)
+  const result = JSON.parse(json as string) as { type: number | null }
   return result.type === null ? null : (result.type as RSAKeyType)
-}
-
-function ensureExports(): void {
-  if (!exports) {
-    throw new Error('WASM runtime not initialized. Call initializeRuntime() first.')
-  }
 }
