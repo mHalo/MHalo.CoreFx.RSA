@@ -31,7 +31,7 @@ export function KeyPanel({
   className
 }: KeyPanelProps) {
   return (
-    <div className={cn('flex flex-col overflow-hidden rounded-2xl bg-card dark:border dark:border-border', className)}>
+    <div className={cn('flex flex-col overflow-hidden rounded-2xl bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-none dark:hover:brightness-105', className)}>
       <div className="flex items-center justify-between gap-2 px-4 py-2.5">
         <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
           {icon}

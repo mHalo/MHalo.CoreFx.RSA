@@ -86,7 +86,7 @@ export default function CryptPage() {
   }
 
   return (
-    <div>
+    <div className="animate-fade-in-up stagger-children">
       <PageHeader title="加密 / 解密" description="使用公钥或私钥对数据进行 RSA 加密与解密" />
 
       <div className="mb-4 grid gap-4 md:grid-cols-2">
@@ -130,6 +130,12 @@ export default function CryptPage() {
 
         {/* 操作列 */}
         <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 px-1 md:w-36 md:flex-col">
+          {processing && (
+            <div className="flex w-full items-center justify-center gap-2 rounded-full bg-muted py-1.5 text-[11px] text-muted-foreground md:mb-1">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              处理中…
+            </div>
+          )}
           {opButton('pub-enc', '公钥加密', <Lock />, true, handleEncrypt)}
           {opButton('pri-dec', '私钥解密', <LockOpen />, true, handleDecrypt)}
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={swapText} aria-label="交换原文与结果">

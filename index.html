@@ -8,7 +8,14 @@
   </head>
   <body>
     <div id="app">
-      <p style="padding: 1em; font-family: sans-serif;">正在加载 RSA ToolBox...</p>
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;gap:10px;font-family:system-ui,sans-serif;color:#666;">
+        <svg width="24" height="24" viewBox="0 0 24 24" style="animation:spin 1s linear infinite">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="#e5e5e5" stroke-width="3" />
+          <circle cx="12" cy="12" r="10" fill="none" stroke="#666" stroke-width="3" stroke-dasharray="40 60" stroke-linecap="round" />
+        </svg>
+        <span style="font-size:14px;">正在加载 RSA ToolBox...</span>
+      </div>
+      <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
     </div>
     <script>
       function showError(label, msg, stack) {

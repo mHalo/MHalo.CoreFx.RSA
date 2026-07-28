@@ -76,7 +76,7 @@ export default function SignPage() {
   const copyText = signatureResult || (verifyResult !== null ? (verifyResult ? '验证通过' : '验证失败') : '')
 
   return (
-    <div>
+    <div className="animate-fade-in-up stagger-children">
       <PageHeader title="签名 / 验签" description="使用私钥签名数据、使用公钥验证签名完整性" />
 
       <div className="mb-4 grid gap-4 md:grid-cols-2">
@@ -101,6 +101,12 @@ export default function SignPage() {
       </div>
 
       <Toolbar className="justify-center">
+        {processing && (
+          <div className="flex w-full items-center justify-center gap-2 rounded-full bg-muted py-1.5 text-[11px] text-muted-foreground md:w-auto md:px-3">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            处理中…
+          </div>
+        )}
         <ToolbarField label="签名算法">
           <Select
             value={String(signerAlgorithm)}

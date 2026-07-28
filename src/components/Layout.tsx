@@ -58,7 +58,7 @@ function WasmStatus() {
 
   if (wasmError) {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-destructive">
+      <span className="flex items-center justify-center gap-1 text-xs text-destructive">
         <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
         核心加载失败
       </span>
@@ -66,14 +66,14 @@ function WasmStatus() {
   }
   if (wasmReady) {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-500">
+      <span className="flex items-center justify-center gap-1 text-xs text-emerald-600 dark:text-emerald-500">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
         核心已就绪
       </span>
     )
   }
   return (
-    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+    <span className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
       <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground" />
       核心加载中…
     </span>
@@ -123,12 +123,12 @@ export default function Layout() {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl px-9 py-7">
+        <div className="mx-auto max-w-6xl px-9 py-7">
           <Outlet />
         </div>
       </main>
 
-      <Toaster />
+      <Toaster position="top-center" />
     </div>
   )
 }

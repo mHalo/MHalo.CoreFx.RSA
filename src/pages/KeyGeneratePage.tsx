@@ -69,78 +69,88 @@ export default function KeyGeneratePage() {
   )
 
   return (
-    <div>
+    <div className="animate-fade-in-up stagger-children">
       <PageHeader title="密钥生成" description="生成 RSA 公钥 / 私钥对，支持多种格式与密钥长度" />
 
-      <Toolbar>
-        <ToolbarField label="密钥类型">
-          <Select value={String(keyType)} onValueChange={(v) => setKeyType(Number(v) as RSAKeyType)}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {keyTypeOptions.map((o) => (
-                <SelectItem key={o.value} value={String(o.value)}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ToolbarField>
-        <ToolbarField label="密钥格式">
-          <Select value={formatType} onValueChange={(v) => setFormatType(v as 'pem' | 'txt')}>
-            <SelectTrigger className="w-28">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {formatOptions.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ToolbarField>
-        <ToolbarField label="密钥长度">
-          <Select value={String(keySize)} onValueChange={(v) => setKeySize(Number(v))}>
-            <SelectTrigger className="w-28">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {keySizeOptions.map((s) => (
-                <SelectItem key={s} value={String(s)}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ToolbarField>
-        <div className="flex-1" />
-        <Button onClick={handleGenerate} disabled={generating}>
-          {generating ? <Loader2 className="animate-spin" /> : <RefreshCw />}
-          生成密钥
-        </Button>
-      </Toolbar>
+      <div className="relative">
+        {generating && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-2xl bg-background/80 backdrop-blur-sm">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="text-sm font-medium text-foreground">正在生成 RSA 密钥对...</div>
+            <div className="text-xs text-muted-foreground">密钥长度 {keySize}，请稍候</div>
+          </div>
+        )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <KeyPanel
-          title="公钥"
-          icon={<Megaphone className="h-3.5 w-3.5" />}
-          value={publicKey}
-          readOnly
-          rows={10}
-          placeholder="公钥将显示在这里"
-          footerLeft={publicKey ? footer : undefined}
-        />
-        <KeyPanel
-          title="私钥"
-          icon={<KeyRound className="h-3.5 w-3.5" />}
-          value={privateKey}
-          readOnly
-          rows={10}
-          placeholder="私钥将显示在这里"
-          footerLeft={privateKey ? footer : undefined}
-        />
+        <Toolbar>
+          <ToolbarField label="密钥类型">
+            <Select value={String(keyType)} onValueChange={(v) => setKeyType(Number(v) as RSAKeyType)} disabled={generating}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {keyTypeOptions.map((o) => (
+                  <SelectItem key={o.value} value={String(o.value)}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </ToolbarField>
+          <ToolbarField label="密钥格式">
+            <Select value={formatType} onValueChange={(v) => setFormatType(v as 'pem' | 'txt')} disabled={generating}>
+              <SelectTrigger className="w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {formatOptions.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </ToolbarField>
+          <ToolbarField label="密钥长度">
+            <Select value={String(keySize)} onValueChange={(v) => setKeySize(Number(v))} disabled={generating}>
+              <SelectTrigger className="w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {keySizeOptions.map((s) => (
+                  <SelectItem key={s} value={String(s)}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </ToolbarField>
+          <div className="flex-1" />
+          <Button onClick={handleGenerate} disabled={generating}>
+            {generating ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+            生成密钥
+          </Button>
+        </Toolbar>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <KeyPanel
+            title="公钥"
+            icon={<Megaphone className="h-3.5 w-3.5" />}
+            value={publicKey}
+            readOnly
+            rows={10}
+            placeholder="公钥将显示在这里"
+            footerLeft={publicKey ? footer : undefined}
+          />
+          <KeyPanel
+            title="私钥"
+            icon={<KeyRound className="h-3.5 w-3.5" />}
+            value={privateKey}
+            readOnly
+            rows={10}
+            placeholder="私钥将显示在这里"
+            footerLeft={privateKey ? footer : undefined}
+          />
+        </div>
       </div>
 
       {publicKey && (

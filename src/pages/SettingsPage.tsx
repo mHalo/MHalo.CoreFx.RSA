@@ -67,7 +67,7 @@ export default function SettingsPage() {
   const [autoCopyPublicKey, setAutoCopyPublicKey] = useState(false)
 
   return (
-    <div>
+    <div className="animate-fade-in-up stagger-children">
       <PageHeader title="设置" description="外观与默认算法偏好" />
 
       <div className="max-w space-y-5">

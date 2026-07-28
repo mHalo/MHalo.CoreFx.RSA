@@ -70,7 +70,7 @@ export default function TransformPage() {
   )
 
   return (
-    <div>
+    <div className="animate-fade-in-up stagger-children">
       <PageHeader title="密钥格式转换" description="在 PKCS#1、PKCS#8、XML 等密钥格式之间相互转换" />
 
       <KeyPanel
@@ -85,6 +85,12 @@ export default function TransformPage() {
       />
 
       <Toolbar className="justify-center">
+        {processing && (
+          <div className="flex w-full items-center justify-center gap-2 rounded-full bg-muted py-1.5 text-[11px] text-muted-foreground md:w-auto md:px-3">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            处理中…
+          </div>
+        )}
         <ToolbarField label="目标密钥类型">
           <Select
             value={String(targetPrivateType)}
