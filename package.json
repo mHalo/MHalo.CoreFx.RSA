@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.1",
   "type": "module",
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
     "build:wasm": "dotnet publish src-core/RsaToolBox.Crossfrom.Core.csproj -c Release -o wasm-core",
     "dev": "pnpm build:wasm && vite",
