@@ -171,6 +171,7 @@ export default function Layout() {
             <NavGroup title="工具" items={toolNav} />
             <NavGroup title="系统" items={systemNav} />
           </div>
+          <Separator className="bg-sidebar-border" />
           <div className="space-y-1.5 px-4 py-3">
             <WasmStatus />
             <UpdateIndicator />
