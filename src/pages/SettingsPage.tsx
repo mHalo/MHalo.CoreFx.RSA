@@ -242,37 +242,25 @@ export default function SettingsPage() {
             <CardDescription>应用版本与更新检查</CardDescription>
           </CardHeader>
           <CardContent>
-            <SettingRow label="当前版本" desc="本地应用版本">
-              <span className="text-sm font-mono">{updateInfo?.currentVersion ?? '-'}</span>
-            </SettingRow>
             <SettingRow
-              label="远程版本"
-              desc={
-                updateInfo
-                  ? updateInfo.isUpdateAvailable
-                    ? `发现新版本`
-                    : '已是最新'
-                  : isChecking ? '检查中...' : '点击下方按钮检查'
-              }
+              label="当前版本"
+              desc={updateInfo
+                ? updateInfo.isUpdateAvailable
+                  ? `发现新版本 v${updateInfo.latestVersion}`
+                  : '已是最新'
+                : isChecking ? '检查中...' : ''}
             >
               <div className="flex items-center gap-2">
-                {updateInfo ? (
-                  <>
-                    <span className={`h-2 w-2 rounded-full ${updateInfo.isUpdateAvailable ? 'bg-blue-500' : 'bg-emerald-500'}`} />
-                    <span className="text-sm font-mono">{updateInfo.latestVersion}</span>
-                    {updateInfo.isUpdateAvailable && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="ml-2 h-7 text-xs"
-                        onClick={() => window.open(updateInfo.latestUrl, '_blank')}
-                      >
-                        前往更新
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  <span className="text-sm text-muted-foreground">-</span>
+                <span className="text-sm font-mono">{updateInfo?.currentVersion ?? '-'}</span>
+                {updateInfo?.isUpdateAvailable && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => window.open(updateInfo.latestUrl, '_blank')}
+                  >
+                    前往更新
+                  </Button>
                 )}
               </div>
             </SettingRow>
