@@ -76,7 +76,7 @@ export default function KeyGeneratePage() {
 
       <div className="relative">
         {generating && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-2xl bg-background/80 backdrop-blur-sm">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-xl bg-background/80 backdrop-blur-sm">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <div className="text-sm font-medium text-foreground">正在生成 RSA 密钥对...</div>
             <div className="text-xs text-muted-foreground">密钥长度 {keySize}，请稍候</div>

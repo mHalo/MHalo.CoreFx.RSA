@@ -137,7 +137,7 @@ export default function SignPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* 原文 */}
-        <div className="flex flex-col overflow-hidden rounded-2xl bg-amber-500/5 dark:border dark:border-border">
+        <div className="flex flex-col overflow-hidden rounded-xl bg-amber-500/5 dark:border dark:border-border">
           <div className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium text-muted-foreground">
             <FileText className="h-3.5 w-3.5" />
             原文 / 数据
@@ -148,13 +148,13 @@ export default function SignPage() {
               onChange={(e) => setPlainText(e.target.value)}
               rows={8}
               placeholder="请输入待签名或待验签的原始数据"
-              className="h-full w-full resize-none rounded-2xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none placeholder:text-muted-foreground"
+              className="h-full w-full resize-none rounded-xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none placeholder:text-muted-foreground"
             />
           </div>
         </div>
 
         {/* 结果 */}
-        <div className="flex flex-col overflow-hidden rounded-2xl bg-emerald-500/5 dark:border dark:border-border">
+        <div className="flex flex-col overflow-hidden rounded-xl bg-emerald-500/5 dark:border dark:border-border">
           <div className="flex items-center justify-between  px-4 py-2.5">
             <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -168,7 +168,7 @@ export default function SignPage() {
                 value={signatureResult}
                 readOnly
                 rows={8}
-                className="h-full w-full resize-none rounded-2xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none"
+                className="h-full w-full resize-none rounded-xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none"
               />
             ) : verifyResult !== null ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">

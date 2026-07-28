@@ -112,7 +112,7 @@ export default function CryptPage() {
 
       <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr]">
         {/* 原文 */}
-        <div className="flex flex-col overflow-hidden rounded-2xl bg-amber-500/5 dark:border dark:border-border">
+        <div className="flex flex-col overflow-hidden rounded-xl bg-amber-500/5 dark:border dark:border-border shadow">
           <div className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium text-muted-foreground">
             <FileText className="h-3.5 w-3.5" />
             原文
@@ -123,13 +123,13 @@ export default function CryptPage() {
               onChange={(e) => setPlainText(e.target.value)}
               rows={10}
               placeholder="请输入待加密的原文"
-              className="h-full w-full resize-none rounded-2xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none placeholder:text-muted-foreground"
+              className="h-full w-full resize-none rounded-xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none placeholder:text-muted-foreground"
             />
           </div>
         </div>
 
         {/* 操作列 */}
-        <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 px-1 md:w-36 md:flex-col">
+        <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 px-1 md:w-36 md:flex-col ">
           {processing && (
             <div className="flex w-full items-center justify-center gap-2 rounded-full bg-muted py-1.5 text-[11px] text-muted-foreground md:mb-1">
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -146,7 +146,7 @@ export default function CryptPage() {
         </div>
 
         {/* 结果 */}
-        <div className="flex flex-col overflow-hidden rounded-2xl bg-emerald-500/5 dark:border dark:border-border">
+        <div className="flex flex-col overflow-hidden rounded-xl bg-emerald-500/5 dark:border dark:border-border shadow">
           <div className="flex items-center justify-between px-4 py-2.5">
             <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -160,7 +160,7 @@ export default function CryptPage() {
               readOnly
               rows={10}
               placeholder="操作结果将显示在这里"
-              className="h-full w-full resize-none rounded-2xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none placeholder:text-muted-foreground"
+              className="h-full w-full resize-none rounded-xl bg-transparent px-2 py-1 font-mono text-xs leading-relaxed outline-none placeholder:text-muted-foreground"
             />
           </div>
         </div>
