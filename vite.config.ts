@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 import { existsSync, cpSync, readFileSync } from 'fs'
 
 export default defineConfig(async () => ({
   plugins: [
-    vue(),
+    react(),
+    tailwindcss(),
 
     // Custom plugin: serve wasm-core/ as static files in dev mode and copy
     // to dist/ on production build. The .NET WASM host lives at <root>/wasm-core/

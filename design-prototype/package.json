@@ -1,0 +1,7 @@
+{
+  "name": "rsatoolbox-design-prototype",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "python3 -m http.server 7100"
+  }
+}

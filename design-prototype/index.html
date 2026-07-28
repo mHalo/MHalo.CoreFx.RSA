@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSA ToolBox — UI 设计示意稿</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f0f2f5;
+    color: #1f2329;
+    line-height: 1.6;
+  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  h1 { text-align:center; margin-bottom: 40px; font-size: 28px; color: #1a1a1a; }
+  h2 { font-size: 20px; margin: 32px 0 12px; color: #333; border-left: 4px solid #18a058; padding-left: 12px; }
+  h3 { font-size: 14px; color: #666; margin-bottom: 16px; font-weight: 400; }
+
+  .page-mockup {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 40px;
+    border: 1px solid #e4e7ed;
+  }
+  .mockup-header {
+    background: #f8f9fa;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: #666;
+    border-bottom: 1px solid #e4e7ed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mockup-body { display: flex; height: 640px; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background: #1e1e1e;
+    color: #fff;
+    padding: 16px 0;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 0 20px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 1px solid #333;
+    margin-bottom: 12px;
+  }
+  .sidebar-item {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #b0b0b0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sidebar-item.active {
+    background: #2d2d2d;
+    color: #18a058;
+    border-right: 3px solid #18a058;
+  }
+  .sidebar-icon { width: 18px; height: 18px; opacity: 0.7; }
+  .sidebar-item.active .sidebar-icon { opacity: 1; }
+
+  /* Content area */
+  .content {
+    flex: 1;
+    padding: 24px 32px;
+    overflow-y: auto;
+  }
+  .page-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+  }
+
+  /* Components */
+  .form-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .form-label {
+    width: 110px;
+    text-align: right;
+    font-size: 14px;
+    color: #606266;
+    flex-shrink: 0;
+  }
+  .form-control {
+    flex: 1;
+    max-width: 400px;
+  }
+  .input-box {
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    background: #fff;
+    color: #606266;
+    min-height: 32px;
+  }
+  .textarea-box {
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 13px;
+    background: #fff;
+    color: #606266;
+    min-height: 90px;
+    font-family: monospace;
+    line-height: 1.5;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+  }
+  .btn-primary { background: #18a058; color: #fff; }
+  .btn-default { background: #fff; color: #606266; border: 1px solid #dcdfe6; }
+  .btn-sm { padding: 4px 12px; font-size: 12px; }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid #e4e7ed;
+    margin-bottom: 20px;
+  }
+  .tab {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #606266;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab.active {
+    color: #18a058;
+    border-bottom-color: #18a058;
+    font-weight: 500;
+  }
+
+  .result-card {
+    border: 1px solid #e4e7ed;
+    border-radius: 8px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+  .result-header {
+    background: #f8f9fa;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e4e7ed;
+  }
+  .result-body {
+    padding: 12px 16px;
+    background: #fafbfc;
+    font-family: monospace;
+    font-size: 12px;
+    color: #606266;
+    line-height: 1.6;
+    min-height: 80px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-success { background: #e8f5e9; color: #2e7d32; }
+  .tag-info { background: #e3f2fd; color: #1565c0; }
+  .tag-warn { background: #fff3e0; color: #ef6c00; }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+  .alert-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .panel {
+    border: 1px solid #e4e7ed;
+    border-radius: 8px;
+    padding: 16px;
+    background: #fafbfc;
+  }
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #909399;
+    font-size: 20px;
+  }
+
+  .key-input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .key-input-label { font-size: 13px; color: #606266; }
+
+  .actions-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #ebeef5;
+  }
+  .setting-label { font-size: 14px; color: #303133; }
+  .setting-desc { font-size: 12px; color: #909399; margin-top: 4px; }
+  .toggle {
+    width: 40px; height: 22px;
+    background: #dcdfe6;
+    border-radius: 11px;
+    position: relative;
+    cursor: pointer;
+  }
+  .toggle.on { background: #18a058; }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: left 0.2s;
+  }
+  .toggle.on::after { left: 20px; }
+
+  .divider {
+    height: 1px;
+    background: #ebeef5;
+    margin: 20px 0;
+  }
+
+  .annotation {
+    background: #fffbe6;
+    border: 1px solid #ffe58f;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #ad6800;
+  }
+  .annotation strong { color: #d48806; }
+
+  /* Dark preview */
+  .dark-preview .sidebar { background: #0d0d0d; }
+  .dark-preview .sidebar-item { color: #888; }
+  .dark-preview .sidebar-item.active { background: #1a1a1a; color: #18a058; }
+  .dark-preview .content { background: #141414; }
+  .dark-preview .page-title { color: #e0e0e0; }
+  .dark-preview .form-label { color: #a0a0a0; }
+  .dark-preview .input-box, .dark-preview .textarea-box {
+    background: #1e1e1e; border-color: #333; color: #c0c0c0;
+  }
+  .dark-preview .tabs { border-bottom-color: #333; }
+  .dark-preview .tab { color: #888; }
+  .dark-preview .tab.active { color: #4caf50; border-bottom-color: #4caf50; }
+  .dark-preview .result-card { border-color: #333; }
+  .dark-preview .result-header { background: #1e1e1e; color: #d0d0d0; border-bottom-color: #333; }
+  .dark-preview .result-body { background: #1a1a1a; color: #999; }
+  .dark-preview .panel { background: #1a1a1a; border-color: #333; }
+  .dark-preview .panel-title { color: #d0d0d0; }
+  .dark-preview .mockup-header { background: #1e1e1e; color: #888; border-bottom-color: #333; }
+  .dark-preview .page-mockup { background: #141414; border-color: #333; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+  .badge-new { background: #e8f5e9; color: #2e7d32; }
+  .badge-improved { background: #e3f2fd; color: #1565c0; }
+
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr; }
+    .mockup-body { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; display: flex; overflow-x: auto; }
+    .sidebar-item { white-space: nowrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎨 RSA ToolBox — UI 设计示意稿</h1>
+
+  <!-- ========== 页面 1: 密钥生成 ========== -->
+  <h2>
+    页面 1：密钥生成
+    <span class="badge badge-improved">布局重构</span>
+  </h2>
+  <h3>改进点：配置区与结果区左右分栏，生成结果更直观；公钥/私钥用卡片式展示；支持一键复制和快捷跳转。</h3>
+
+  <div class="page-mockup">
+    <div class="mockup-header">
+      <span>RSA ToolBox v0.1.0</span>
+      <span>亮色主题 / 1200×800</span>
+    </div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="sidebar-logo">🔐 RSA ToolBox</div>
+        <div class="sidebar-item active">🔑 密钥生成</div>
+        <div class="sidebar-item">🔒 加密 / 解密</div>
+        <div class="sidebar-item">✏️ 签名 / 验签</div>
+        <div class="sidebar-item">🔄 格式转换</div>
+        <div class="sidebar-item">⚙️ 设置</div>
+      </div>
+      <div class="content">
+        <div class="page-title">密钥生成</div>
+
+        <div class="two-col" style="gap: 24px; align-items: start;">
+          <!-- 配置面板 -->
+          <div class="panel" style="background: #fff;">
+            <div class="panel-title">⚙️ 生成配置</div>
+
+            <div class="form-row">
+              <div class="form-label">密钥长度</div>
+              <div class="form-control">
+                <div class="input-box">2048 bit ▼</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-label">密钥类型</div>
+              <div class="form-control">
+                <div class="input-box">PKCS#8 ▼</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-label">PEM 编码</div>
+              <div class="form-control">
+                <div class="toggle"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-label"></div>
+              <div class="form-control">
+                <button class="btn btn-primary">生成密钥对</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 结果面板 -->
+          <div>
+            <div class="result-card">
+              <div class="result-header">
+                <span>📢 公钥 <span class="tag tag-info">PKCS#8</span></span>
+                <button class="btn btn-sm btn-default">复制</button>
+              </div>
+              <div class="result-body">
+                MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Z3VS5JJcds3xfn/ygWyF8PbnGy0AHB7MhgwKVPSmwaFkYLv...
+              </div>
+            </div>
+            <div style="height: 12px;"></div>
+            <div class="result-card">
+              <div class="result-header">
+                <span>🔒 私钥 <span class="tag tag-warn">PKCS#8</span></span>
+                <button class="btn btn-sm btn-default">复制</button>
+              </div>
+              <div class="result-body">
+                MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDRndVLkklx2zfF+f/KBbIXw9ucbLQAcHsyGDA...
+              </div>
+            </div>
+
+            <div class="actions-bar" style="margin-top: 16px;">
+              <button class="btn btn-default btn-sm">📋 复制全部</button>
+              <button class="btn btn-default btn-sm">🔒 用于加密</button>
+              <button class="btn btn-default btn-sm">✏️ 用于签名</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 页面 2: 加密/解密 ========== -->
+  <h2>
+    页面 2：加密 / 解密
+    <span class="badge badge-improved">流程优化</span>
+  </h2>
+  <h3>改进点：输入与输出采用左右分栏，形成"原文 → 密文"的直观流向；密钥输入增加格式检测标签；结果区域突出展示。</h3>
+
+  <div class="page-mockup">
+    <div class="mockup-header">
+      <span>RSA ToolBox v0.1.0</span>
+      <span>亮色主题 / 1200×800</span>
+    </div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="sidebar-logo">🔐 RSA ToolBox</div>
+        <div class="sidebar-item">🔑 密钥生成</div>
+        <div class="sidebar-item active">🔒 加密 / 解密</div>
+        <div class="sidebar-item">✏️ 签名 / 验签</div>
+        <div class="sidebar-item">🔄 格式转换</div>
+        <div class="sidebar-item">⚙️ 设置</div>
+      </div>
+      <div class="content">
+        <div class="page-title">加密 / 解密</div>
+        <div class="tabs">
+          <div class="tab active">🔐 加密</div>
+          <div class="tab">🔓 解密</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-label">加密算法</div>
+          <div class="form-control">
+            <div class="input-box">RSA/ECB/PKCS1Padding ▼</div>
+          </div>
+        </div>
+
+        <div class="key-input-header" style="max-width: 640px;">
+          <span class="key-input-label">公钥</span>
+          <span class="tag tag-success">PKCS#8 已识别</span>
+        </div>
+        <div class="textarea-box" style="max-width: 640px; margin-bottom: 16px;">
+          -----BEGIN PUBLIC KEY-----<br>
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Z3VS5JJcds3xfn/ygWy...
+          -----END PUBLIC KEY-----
+        </div>
+
+        <div class="two-col" style="max-width: 880px; gap: 16px;">
+          <div>
+            <div class="key-input-header">
+              <span class="key-input-label">原文（明文）</span>
+            </div>
+            <div class="textarea-box" style="min-height: 120px;">
+              Hello, RSA ToolBox!
+            </div>
+            <div style="margin-top: 12px;">
+              <button class="btn btn-primary">加密 →</button>
+            </div>
+          </div>
+          <div>
+            <div class="key-input-header">
+              <span class="key-input-label">密文（Base64）</span>
+              <button class="btn btn-sm btn-default">复制</button>
+            </div>
+            <div class="textarea-box" style="min-height: 120px; background: #f0f9eb; border-color: #b3e19d;">
+              Y3J5cHRvZ3JhcGhpYyBpcyBmdW4gYW5kIGV4Y2l0aW5nLi4u
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 页面 3: 签名/验签 ========== -->
+  <h2>
+    页面 3：签名 / 验签
+    <span class="badge badge-improved">交互增强</span>
+  </h2>
+  <h3>改进点：签名结果使用结果卡片统一风格；验签结果使用醒目的 Alert 组件（成功绿色/失败红色）；保持与加密解密一致的布局语言。</h3>
+
+  <div class="page-mockup">
+    <div class="mockup-header">
+      <span>RSA ToolBox v0.1.0</span>
+      <span>亮色主题 / 1200×800</span>
+    </div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="sidebar-logo">🔐 RSA ToolBox</div>
+        <div class="sidebar-item">🔑 密钥生成</div>
+        <div class="sidebar-item">🔒 加密 / 解密</div>
+        <div class="sidebar-item active">✏️ 签名 / 验签</div>
+        <div class="sidebar-item">🔄 格式转换</div>
+        <div class="sidebar-item">⚙️ 设置</div>
+      </div>
+      <div class="content">
+        <div class="page-title">签名 / 验签</div>
+        <div class="tabs">
+          <div class="tab active">✏️ 签名</div>
+          <div class="tab">✅ 验签</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-label">签名算法</div>
+          <div class="form-control">
+            <div class="input-box">SHA256withRSA ▼</div>
+          </div>
+        </div>
+
+        <div class="key-input-header" style="max-width: 640px;">
+          <span class="key-input-label">私钥</span>
+          <span class="tag tag-success">PKCS#8 已识别</span>
+        </div>
+        <div class="textarea-box" style="max-width: 640px; margin-bottom: 16px;">
+          -----BEGIN PRIVATE KEY-----<br>
+          MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDRndVLkklx2zfF...
+          -----END PRIVATE KEY-----
+        </div>
+
+        <div class="two-col" style="max-width: 880px; gap: 16px;">
+          <div>
+            <div class="key-input-header">
+              <span class="key-input-label">待签名数据</span>
+            </div>
+            <div class="textarea-box" style="min-height: 100px;">
+              { "orderId": "202407270001", "amount": 199.99 }
+            </div>
+            <div style="margin-top: 12px;">
+              <button class="btn btn-primary">生成签名 →</button>
+            </div>
+          </div>
+          <div>
+            <div class="key-input-header">
+              <span class="key-input-label">签名结果（Base64）</span>
+              <button class="btn btn-sm btn-default">复制</button>
+            </div>
+            <div class="textarea-box" style="min-height: 100px; background: #f0f9eb; border-color: #b3e19d;">
+              MEUCIQDtYqJ0+HYj+pH1RJ6qKwbjKj7N1wQmQJ+8B+KZf4...
+            </div>
+          </div>
+        </div>
+
+        <!-- 验签预览（折叠态示意） -->
+        <div class="divider"></div>
+        <div style="font-size: 13px; color: #909399;">
+          💡 切换到「验签」页可验证签名有效性
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 页面 4: 格式转换 ========== -->
+  <h2>
+    页面 4：密钥格式转换
+    <span class="badge badge-new">可视化改造</span>
+  </h2>
+  <h3>改进点：采用"输入 → 转换 → 输出"的三段式可视化流程；私钥转换同时展示提取出的对应公钥；转换配置（目标格式/PEM）集中在上部工具栏。</h3>
+
+  <div class="page-mockup">
+    <div class="mockup-header">
+      <span>RSA ToolBox v0.1.0</span>
+      <span>亮色主题 / 1200×800</span>
+    </div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="sidebar-logo">🔐 RSA ToolBox</div>
+        <div class="sidebar-item">🔑 密钥生成</div>
+        <div class="sidebar-item">🔒 加密 / 解密</div>
+        <div class="sidebar-item">✏️ 签名 / 验签</div>
+        <div class="sidebar-item active">🔄 格式转换</div>
+        <div class="sidebar-item">⚙️ 设置</div>
+      </div>
+      <div class="content">
+        <div class="page-title">密钥格式转换</div>
+        <div class="tabs">
+          <div class="tab active">📢 公钥转换</div>
+          <div class="tab">🔒 私钥转换</div>
+        </div>
+
+        <!-- 转换配置工具栏 -->
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding: 12px 16px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e4e7ed;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; color: #606266;">目标格式</span>
+            <div class="input-box" style="min-width: 140px;">PKCS#1 ▼</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; color: #606266;">PEM 编码</span>
+            <div class="toggle on"></div>
+          </div>
+          <div style="flex:1"></div>
+          <button class="btn btn-primary">🔄 开始转换</button>
+        </div>
+
+        <div class="two-col" style="gap: 16px; align-items: start;">
+          <div>
+            <div class="key-input-header">
+              <span class="key-input-label">输入公钥</span>
+              <span class="tag tag-info">PKCS#8 已识别</span>
+            </div>
+            <div class="textarea-box" style="min-height: 180px;">
+              -----BEGIN PUBLIC KEY-----<br>
+              MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Z3VS5JJcds3xfn/ygWy<br>
+              F8PbnGy0AHB7MhgwKVPSmwaFkYLv+K1wJaGAPxWJn+8sC2I1hN6xN1V0KjGgKpC<br>
+              ...<br>
+              -----END PUBLIC KEY-----
+            </div>
+          </div>
+
+          <div class="panel-arrow" style="padding-top: 80px;">➜</div>
+
+          <div>
+            <div class="key-input-header">
+              <span class="key-input-label">转换后公钥</span>
+              <span class="tag tag-success">PKCS#1</span>
+              <button class="btn btn-sm btn-default">复制</button>
+            </div>
+            <div class="textarea-box" style="min-height: 180px; background: #f0f9eb; border-color: #b3e19d;">
+              -----BEGIN RSA PUBLIC KEY-----<br>
+              MIIBCgKCAQEA0Z3VS5JJcds3xfn/ygWyF8PbnGy0AHB7MhgwKVPSmwaFkYLv+K1w<br>
+              JaGAPxWJn+8sC2I1hN6xN1V0KjGgKpC...<br>
+              -----END RSA PUBLIC KEY-----
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 页面 5: 设置 ========== -->
+  <h2>
+    页面 5：设置
+    <span class="badge badge-improved">内容扩展</span>
+  </h2>
+  <h3>改进点：增加更多实用设置项（自动复制、密钥预览长度、默认算法等）；统一采用列表式设置卡片；主题切换即时预览。</h3>
+
+  <div class="page-mockup">
+    <div class="mockup-header">
+      <span>RSA ToolBox v0.1.0</span>
+      <span>亮色主题 / 1200×800</span>
+    </div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="sidebar-logo">🔐 RSA ToolBox</div>
+        <div class="sidebar-item">🔑 密钥生成</div>
+        <div class="sidebar-item">🔒 加密 / 解密</div>
+        <div class="sidebar-item">✏️ 签名 / 验签</div>
+        <div class="sidebar-item">🔄 格式转换</div>
+        <div class="sidebar-item active">⚙️ 设置</div>
+      </div>
+      <div class="content">
+        <div class="page-title">设置</div>
+
+        <div style="max-width: 640px;">
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">🌙 深色主题</div>
+              <div class="setting-desc">切换应用整体为深色模式</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">📋 生成后自动复制公钥</div>
+              <div class="setting-desc">密钥生成成功后自动将公钥复制到剪贴板</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">🔤 密钥预览长度</div>
+              <div class="setting-desc">结果区域中密钥的预览字符数</div>
+            </div>
+            <div class="input-box" style="width: 80px; text-align: center;">200</div>
+          </div>
+
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">🔐 默认加密算法</div>
+              <div class="setting-desc">加密页面的默认选中算法</div>
+            </div>
+            <div class="input-box" style="width: 260px;">RSA/ECB/OAEPWithSHA-256AndMGF1Padding ▼</div>
+          </div>
+
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">✏️ 默认签名算法</div>
+              <div class="setting-desc">签名页面的默认选中算法</div>
+            </div>
+            <div class="input-box" style="width: 200px;">SHA256withRSA ▼</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 暗色主题预览 ========== -->
+  <h2>
+    暗色主题全局预览
+    <span class="badge badge-new">主题适配</span>
+  </h2>
+  <h3>所有页面同步支持暗色主题，边框、卡片、输入框颜色统一适配。</h3>
+
+  <div class="page-mockup dark-preview">
+    <div class="mockup-header">
+      <span>RSA ToolBox v0.1.0</span>
+      <span>暗色主题 / 1200×800</span>
+    </div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="sidebar-logo">🔐 RSA ToolBox</div>
+        <div class="sidebar-item active">🔑 密钥生成</div>
+        <div class="sidebar-item">🔒 加密 / 解密</div>
+        <div class="sidebar-item">✏️ 签名 / 验签</div>
+        <div class="sidebar-item">🔄 格式转换</div>
+        <div class="sidebar-item">⚙️ 设置</div>
+      </div>
+      <div class="content">
+        <div class="page-title">密钥生成</div>
+        <div class="two-col" style="gap: 24px; align-items: start;">
+          <div class="panel" style="background: #1a1a1a; border-color: #333;">
+            <div class="panel-title" style="color: #d0d0d0;">⚙️ 生成配置</div>
+            <div class="form-row">
+              <div class="form-label">密钥长度</div>
+              <div class="form-control"><div class="input-box">2048 bit ▼</div></div>
+            </div>
+            <div class="form-row">
+              <div class="form-label">密钥类型</div>
+              <div class="form-control"><div class="input-box">PKCS#8 ▼</div></div>
+            </div>
+            <div class="form-row">
+              <div class="form-label">PEM 编码</div>
+              <div class="form-control"><div class="toggle on"></div></div>
+            </div>
+            <div class="form-row">
+              <div class="form-label"></div>
+              <div class="form-control"><button class="btn btn-primary">生成密钥对</button></div>
+            </div>
+          </div>
+          <div>
+            <div class="result-card">
+              <div class="result-header">
+                <span>📢 公钥 <span class="tag tag-info">PKCS#8</span></span>
+                <button class="btn btn-sm btn-default">复制</button>
+              </div>
+              <div class="result-body">
+                MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Z3VS5JJcds3xfn/ygWy...
+              </div>
+            </div>
+            <div style="height: 12px;"></div>
+            <div class="result-card">
+              <div class="result-header">
+                <span>🔒 私钥 <span class="tag tag-warn">PKCS#8</span></span>
+                <button class="btn btn-sm btn-default">复制</button>
+              </div>
+              <div class="result-body">
+                MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDRndVLkklx2zfF...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 总结 -->
+  <div class="annotation" style="margin-top: 40px;">
+    <strong>📋 设计改进总结：</strong><br>
+    1. <strong>布局统一</strong>：所有页面采用「配置区 ↔ 结果区」左右分栏，视觉流向清晰<br>
+    2. <strong>组件统一</strong>：结果统一使用 ResultCard，密钥输入统一使用 KeyInput（含格式检测标签）<br>
+    3. <strong>交互增强</strong>：增加「复制」「快捷跳转」「一键转换」等高频操作<br>
+    4. <strong>设置扩展</strong>：从单一主题开关扩展为包含默认算法、自动复制、预览长度等实用配置<br>
+    5. <strong>暗色适配</strong>：全局暗色主题统一配色，不再仅有 sidebar 变色
+  </div>
+
+</div>
+
+</body>
+</html>
