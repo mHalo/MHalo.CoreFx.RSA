@@ -38,8 +38,8 @@ function NavGroup({ title, items }: { title: string; items: typeof toolNav }) {
               cn(
                 'flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] transition-colors',
                 isActive
-                  ? 'bg-accent font-medium text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+                  ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+                  : 'text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
               )
             }
           >
@@ -91,11 +91,11 @@ export default function Layout() {
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <aside className="flex w-56 shrink-0 flex-col border-r bg-card">
+      <aside className="flex w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
         <div className="flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600">
-              <KeyRound className="h-4 w-4 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary">
+              <KeyRound className="h-4 w-4 text-sidebar-primary-foreground" />
             </div>
             <div>
               <div className="text-[13px] font-semibold leading-tight">RSA ToolBox</div>
@@ -110,12 +110,12 @@ export default function Layout() {
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
         </div>
-        <Separator />
+        <Separator className="bg-sidebar-border" />
         <div className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
           <NavGroup title="工具" items={toolNav} />
           <NavGroup title="系统" items={systemNav} />
         </div>
-        <Separator />
+        <Separator className="bg-sidebar-border" />
         <div className="px-4 py-3">
           <WasmStatus />
         </div>

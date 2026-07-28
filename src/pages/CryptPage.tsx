@@ -112,8 +112,8 @@ export default function CryptPage() {
 
       <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr]">
         {/* 原文 */}
-        <div className="flex flex-col overflow-hidden rounded-xl border border-l-[3px] border-l-amber-500 bg-amber-500/5 shadow-sm">
-          <div className="flex items-center gap-1.5 border-b px-4 py-2.5 text-[13px] font-medium text-muted-foreground">
+        <div className="flex flex-col overflow-hidden rounded-xl bg-amber-500/5 shadow-sm">
+          <div className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium text-muted-foreground">
             <FileText className="h-3.5 w-3.5" />
             原文
           </div>
@@ -140,8 +140,8 @@ export default function CryptPage() {
         </div>
 
         {/* 结果 */}
-        <div className="flex flex-col overflow-hidden rounded-xl border border-l-[3px] border-l-emerald-500 bg-emerald-500/5 shadow-sm">
-          <div className="flex items-center justify-between border-b px-4 py-2.5">
+        <div className="flex flex-col overflow-hidden rounded-xl  bg-emerald-500/5 shadow-sm">
+          <div className="flex items-center justify-between px-4 py-2.5">
             <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
               <CheckCircle2 className="h-3.5 w-3.5" />
               结果

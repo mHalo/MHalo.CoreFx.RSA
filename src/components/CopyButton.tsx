@@ -24,7 +24,7 @@ export function CopyButton({ text, size = 'sm' }: CopyButtonProps) {
   if (size === 'icon') {
     return (
       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopy}>
-        {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+        {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
       </Button>
     )
   }
@@ -33,7 +33,7 @@ export function CopyButton({ text, size = 'sm' }: CopyButtonProps) {
     <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleCopy}>
       {copied ? (
         <>
-          <Check className="h-3.5 w-3.5 text-emerald-500" />
+          <Check className="h-3.5 w-3.5 text-primary" />
           已复制
         </>
       ) : (
