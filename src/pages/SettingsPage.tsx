@@ -224,9 +224,20 @@ export default function SettingsPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Info className="h-4 w-4" />
-              关于与更新
+            <CardTitle className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                关于与更新
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                disabled={isChecking}
+                onClick={() => check()}
+              >
+                {isChecking ? '检查中...' : '检查更新'}
+              </Button>
             </CardTitle>
             <CardDescription>应用版本与更新检查</CardDescription>
           </CardHeader>
@@ -265,16 +276,6 @@ export default function SettingsPage() {
                 )}
               </div>
             </SettingRow>
-            <div className="flex justify-end">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={isChecking}
-                onClick={() => check()}
-              >
-                {isChecking ? '检查中...' : '检查更新'}
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
