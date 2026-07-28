@@ -70,10 +70,16 @@ export default function CryptPage() {
     setResultText(tmp)
   }
 
-  function opButton(op: Op, label: string, icon: React.ReactNode, primary: boolean, onClick: () => void) {
+  function opButton(
+    op: Op,
+    label: string,
+    icon: React.ReactNode,
+    variant: 'encryptPublic' | 'encryptPrivate' | 'decryptPrivate' | 'decryptPublic',
+    onClick: () => void
+  ) {
     return (
       <Button
-        variant={primary ? 'default' : 'secondary'}
+        variant={variant}
         size="sm"
         className="w-full"
         disabled={processing !== null}
@@ -113,7 +119,7 @@ export default function CryptPage() {
       <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr]">
         {/* 原文 */}
         <div className="flex flex-col overflow-hidden rounded-xl bg-amber-500/5 dark:border dark:border-border shadow">
-          <div className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium text-muted-foreground">
+          <div className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-800/10 text-[13px] font-medium text-muted-foreground">
             <FileText className="h-3.5 w-3.5" />
             原文
           </div>
@@ -136,18 +142,25 @@ export default function CryptPage() {
               处理中…
             </div>
           )}
-          {opButton('pub-enc', '公钥加密', <Lock />, true, handleEncrypt)}
-          {opButton('pri-dec', '私钥解密', <LockOpen />, true, handleDecrypt)}
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={swapText} aria-label="交换原文与结果">
+          {opButton('pub-enc', '公钥加密', <Lock />, 'encryptPublic', handleEncrypt)}
+          {opButton('pri-dec', '私钥解密', <LockOpen />, 'decryptPrivate', handleDecrypt)}
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-9 w-9 rounded-full border-border bg-card shadow-sm hover:bg-accent"
+            onClick={swapText}
+            aria-label="交换原文与结果"
+            title="交换原文与结果"
+          >
             <ArrowLeftRight className="h-4 w-4" />
           </Button>
-          {opButton('pri-enc', '私钥加密', <Lock />, false, handleEncryptByPrivateKey)}
-          {opButton('pub-dec', '公钥解密', <LockOpen />, false, handleDecryptByPublicKey)}
+          {opButton('pri-enc', '私钥加密', <Lock />, 'encryptPrivate', handleEncryptByPrivateKey)}
+          {opButton('pub-dec', '公钥解密', <LockOpen />, 'decryptPublic', handleDecryptByPublicKey)}
         </div>
 
         {/* 结果 */}
         <div className="flex flex-col overflow-hidden rounded-xl bg-emerald-500/5 dark:border dark:border-border shadow">
-          <div className="flex items-center justify-between px-4 py-2.5">
+          <div className="flex items-center justify-between bg-emerald-800/10 px-4 py-2.5">
             <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
               <CheckCircle2 className="h-3.5 w-3.5" />
               结果

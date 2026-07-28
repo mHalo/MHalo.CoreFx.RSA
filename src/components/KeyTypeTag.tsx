@@ -8,8 +8,7 @@ const config: Record<RSAKeyType, { label: string; className: string }> = {
   },
   [RSAKeyType.Pkcs8]: {
     label: 'PKCS#8',
-    className:
-      'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400'
+    className: 'border-primary/30 bg-primary/10 text-primary'
   },
   [RSAKeyType.Xml]: {
     label: 'XML',

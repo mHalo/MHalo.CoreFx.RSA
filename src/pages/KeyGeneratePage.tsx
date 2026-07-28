@@ -163,11 +163,11 @@ export default function KeyGeneratePage() {
 
       {publicKey && (
         <div className="mt-5 flex gap-3">
-          <Button variant="secondary" onClick={() => sendTo('/crypt')}>
+          <Button onClick={() => sendTo('/crypt')}>
             发送到加密/解密
             <ArrowRight />
           </Button>
-          <Button variant="secondary" onClick={() => sendTo('/sign')}>
+          <Button variant="outline" onClick={() => sendTo('/sign')}>
             发送到签名/验签
             <ArrowRight />
           </Button>
