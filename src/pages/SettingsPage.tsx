@@ -250,6 +250,7 @@ export default function SettingsPage() {
                   : '已是最新'
                 : isChecking ? '检查中...' : ''
             }
+            >
               <div className="flex items-center gap-2">
                 <span className="text-sm font-mono">{updateInfo?.currentVersion ?? '-'}</span>
                 {updateInfo?.isUpdateAvailable && (
