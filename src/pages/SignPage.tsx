@@ -131,7 +131,7 @@ export default function SignPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* 原文 */}
-        <div className="flex flex-col overflow-hidden rounded-xl bg-amber-500/5 shadow-sm">
+        <div className="flex flex-col overflow-hidden rounded-2xl bg-amber-500/5">
           <div className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium text-muted-foreground">
             <FileText className="h-3.5 w-3.5" />
             原文 / 数据
@@ -148,7 +148,7 @@ export default function SignPage() {
         </div>
 
         {/* 结果 */}
-        <div className="flex flex-col overflow-hidden rounded-xl  bg-emerald-500/5 shadow-sm">
+        <div className="flex flex-col overflow-hidden rounded-2xl bg-emerald-500/5">
           <div className="flex items-center justify-between  px-4 py-2.5">
             <span className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
               <CheckCircle2 className="h-3.5 w-3.5" />

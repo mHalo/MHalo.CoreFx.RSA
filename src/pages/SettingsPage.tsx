@@ -70,7 +70,7 @@ export default function SettingsPage() {
     <div>
       <PageHeader title="设置" description="外观与默认算法偏好" />
 
-      <div className="max-w-xl space-y-5">
+      <div className="max-w space-y-5">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -100,7 +100,7 @@ export default function SettingsPage() {
                 value={String(defaultCipher)}
                 onValueChange={(v) => setDefaultCipher(Number(v) as CipherAlgorithm)}
               >
-                <SelectTrigger className="w-72">
+                <SelectTrigger className="w-96">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -117,7 +117,7 @@ export default function SettingsPage() {
                 value={String(defaultSigner)}
                 onValueChange={(v) => setDefaultSigner(Number(v) as SignerAlgorithm)}
               >
-                <SelectTrigger className="w-52">
+                <SelectTrigger className="w-96">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
