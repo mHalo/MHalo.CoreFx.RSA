@@ -146,7 +146,7 @@ export default function Layout() {
   }, [themeColor, isDark])
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="flex h-screen flex-col bg-background border-t border-border">
       {/* Body */}
       <div className="flex flex-1 min-h-0 p-3">
         <aside className="flex w-56 shrink-0 flex-col rounded-xl bg-sidebar text-sidebar-foreground shadow-lg">
@@ -171,7 +171,6 @@ export default function Layout() {
             <NavGroup title="工具" items={toolNav} />
             <NavGroup title="系统" items={systemNav} />
           </div>
-          <Separator className="bg-sidebar-border" />
           <div className="space-y-1.5 px-4 py-3">
             <WasmStatus />
             <UpdateIndicator />
