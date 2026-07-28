@@ -49,13 +49,16 @@ jobs:
           dotnet-version: '9.0.x'
       - run: pnpm install --frozen-lockfile
       - run: pnpm tauri:build
-        # macOS codesigning: uncomment and set these secrets when you have a Developer ID certificate
-        # env:
-        #   APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-        #   APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-        #   APPLE_ID: ${{ secrets.APPLE_ID }}
-        #   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        #   APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      - name: Re-sign .app with proper ad-hoc signature
+        run: bash scripts/macos-resign.sh
+        # macOS codesigning with Developer ID (uncomment when you have a certificate):
+        #  1. Remove the "Re-sign .app" step above
+        #  2. Add these env vars to `pnpm tauri:build`:
+        #     APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        #     APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        #     APPLE_ID: ${{ secrets.APPLE_ID }}
+        #     APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        #     APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
       - uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
