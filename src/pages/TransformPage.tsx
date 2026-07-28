@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeftRight, KeyRound, Loader2, Lock, Megaphone } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -34,6 +34,26 @@ export default function TransformPage() {
 
   const [inputPrivateKey, setInputPrivateKey] = useState('')
   const [inputPrivateKeyType, setInputPrivateKeyType] = useState<RSAKeyType | null>(null)
+  const detectRef = useRef(0)
+
+  // 输入变化时自动检测私钥格式（debounce 300ms，避免频繁调用WASM）
+  useEffect(() => {
+    const token = ++detectRef.current
+    if (!inputPrivateKey) {
+      setInputPrivateKeyType(null)
+      return
+    }
+    const timer = setTimeout(async () => {
+      // 只有最新的请求才更新状态
+      if (token !== detectRef.current) return
+      try {
+        setInputPrivateKeyType(await detectKeyType(inputPrivateKey, true))
+      } catch {
+        setInputPrivateKeyType(null)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [inputPrivateKey])
   const [outputPublicKey, setOutputPublicKey] = useState('')
   const [outputPrivateKey, setOutputPrivateKey] = useState('')
 
@@ -41,11 +61,6 @@ export default function TransformPage() {
 
   async function handleTransform() {
     if (!inputPrivateKey) return toast.warning('请输入私钥')
-    try {
-      setInputPrivateKeyType(await detectKeyType(inputPrivateKey, true))
-    } catch {
-      setInputPrivateKeyType(null)
-    }
     setProcessing(true)
     try {
       const result = await transformPrivateKeyFormat(inputPrivateKey, targetPrivateType, outputFormat === 'pem')
