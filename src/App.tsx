@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Layout from '@/components/Layout'
+import KeyGeneratePage from '@/pages/KeyGeneratePage'
 import { initializeRuntime } from '@/services/wasmRsaService'
 import { useKeyStore } from '@/stores/keyStore'
 
@@ -26,7 +27,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/generate" replace />} />
-          <Route path="/generate" element={<Placeholder name="密钥生成" />} />
+          <Route path="/generate" element={<KeyGeneratePage />} />
           <Route path="/crypt" element={<Placeholder name="加密 / 解密" />} />
           <Route path="/sign" element={<Placeholder name="签名 / 验签" />} />
           <Route path="/transform" element={<Placeholder name="格式转换" />} />
