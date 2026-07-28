@@ -10,22 +10,35 @@ interface DotnetHost {
 }
 
 let exports: Record<string, (...args: unknown[]) => unknown> | null = null
+let initPromise: Promise<void> | null = null
 
-export async function initializeRuntime(): Promise<void> {
-  if (exports) return
+export function initializeRuntime(): Promise<void> {
+  if (exports) return Promise.resolve()
+  // Guard against concurrent init (React StrictMode double-invokes effects in dev):
+  // reuse the in-flight promise so dotnet.create() is only called once.
+  if (initPromise) return initPromise
 
-  // The .NET 9 WASM host module is pre-loaded in index.html via
-  // dotnet-global.ts, which imports dotnet.js and stashes the API on
-  // globalThis.__dotnetHost. This avoids dynamic import() which is
-  // incompatible with Vite's handling of non-source-dir modules.
-  const dotnet = (globalThis as unknown as { __dotnetHost: DotnetHost }).__dotnetHost
-  const runtime = await dotnet.create()
-  const config = runtime.getConfig()
-  const assemblyExports = await runtime.getAssemblyExports(config.mainAssemblyName)
-  let svc: Record<string, unknown> = assemblyExports.RsaToolBox as Record<string, unknown>
-  svc = svc.Crossfrom as Record<string, unknown>
-  svc = svc.Core as Record<string, unknown>
-  exports = svc.RsaInteropService as Record<string, (...args: unknown[]) => unknown>
+  initPromise = (async () => {
+    // The .NET 9 WASM host module is pre-loaded in index.html via
+    // dotnet-global.ts, which imports dotnet.js and stashes the API on
+    // globalThis.__dotnetHost. This avoids dynamic import() which is
+    // incompatible with Vite's handling of non-source-dir modules.
+    const dotnet = (globalThis as unknown as { __dotnetHost: DotnetHost }).__dotnetHost
+    const runtime = await dotnet.create()
+    const config = runtime.getConfig()
+    const assemblyExports = await runtime.getAssemblyExports(config.mainAssemblyName)
+    let svc: Record<string, unknown> = assemblyExports.RsaToolBox as Record<string, unknown>
+    svc = svc.Crossfrom as Record<string, unknown>
+    svc = svc.Core as Record<string, unknown>
+    exports = svc.RsaInteropService as Record<string, (...args: unknown[]) => unknown>
+  })()
+
+  // If init fails, allow retry by resetting the in-flight promise.
+  initPromise.catch(() => {
+    initPromise = null
+  })
+
+  return initPromise
 }
 
 export async function generateKeyPair(
