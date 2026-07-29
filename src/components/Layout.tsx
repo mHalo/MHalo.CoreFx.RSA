@@ -94,6 +94,12 @@ export default function Layout() {
   const hasUpdate = useUpdateStore((s) => s.hasUpdate)
   const updateInfo = useUpdateStore((s) => s.updateInfo)
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
+  const checkForUpdate = useUpdateStore((s) => s.checkForUpdate)
+
+  // 应用启动时静默检测版本（不显示任何 UI 指示器）
+  useEffect(() => {
+    checkForUpdate()
+  }, [checkForUpdate])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
@@ -141,7 +147,7 @@ export default function Layout() {
                       </button>
                     </>
                   ) : (
-                    <span>v{currentVersion ?? '-'}</span>
+                    currentVersion && <span>v{currentVersion ?? '-'}</span>
                   )}
                 </div>
               </div>

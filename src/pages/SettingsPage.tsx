@@ -230,24 +230,6 @@ export default function SettingsPage() {
                 <Info className="h-4 w-4" />
                 关于与更新
               </span>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-xs"
-                disabled={isChecking}
-                onClick={async () => {
-                  const result = await check(true)
-                  if (result?.isUpdateAvailable) {
-                    toast.success(`发现新版本 v${result.latestVersion}`)
-                  } else if (result) {
-                    toast.success('已是最新版本')
-                  } else {
-                    toast.error('检查失败，请稍后重试')
-                  }
-                }}
-              >
-                {isChecking ? '检查中...' : '检查更新'}
-              </Button>
             </CardTitle>
             <CardDescription>应用版本与更新检查</CardDescription>
           </CardHeader>
@@ -255,26 +237,39 @@ export default function SettingsPage() {
             <SettingRow
               label="当前版本"
               last={true}
-              desc={
-                updateInfo
-                  ? updateInfo.isUpdateAvailable
-                    ? `发现新版本 v${updateInfo.latestVersion}`
-                    : '已是最新'
-                  : isChecking
-                    ? '检查中...'
-                    : ''
-              }
+              desc={updateInfo?.currentVersion ?? '已是最新版本'}
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm font-mono">{updateInfo?.currentVersion ?? '-'}</span>
-                {updateInfo?.isUpdateAvailable && (
+                
+                {updateInfo?.isUpdateAvailable ? (
+                  <>
+                    <span className='mr-2 text-blue-600 dark:text-blue-400'>发现新版本 v{updateInfo?.latestVersion}</span>
+                    <Button
+                      size="sm"
+                      className="h-7 text-xs" 
+                      onClick={() => window.open(updateInfo.latestUrl, '_blank')}
+                    >
+                      前往更新
+                    </Button>
+                  </>
+                ) : (
                   <Button
                     size="sm"
                     variant="outline"
                     className="h-7 text-xs"
-                    onClick={() => window.open(updateInfo.latestUrl, '_blank')}
+                    disabled={isChecking}
+                    onClick={async () => {
+                      const result = await check(true)
+                      if (result?.isUpdateAvailable) {
+                        toast.success(`发现新版本 v${result.latestVersion}`)
+                      } else if (result) {
+                        toast.success('已是最新版本')
+                      } else {
+                        toast.error('检查失败，请稍后重试')
+                      }
+                    }}
                   >
-                    前往更新
+                    {isChecking ? '检查中...' : '检查更新'}
                   </Button>
                 )}
               </div>
