@@ -163,15 +163,21 @@ export default function Layout() {
               <div>
                 <div className="text-[13px] font-semibold leading-tight">RSA工具箱</div>
                 <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <span>v{currentVersion ?? '-'}</span>
-                  {hasUpdate && (
-                    <button
-                      onClick={() => setUpdateDialogOpen(true)}
-                      className="cursor-pointer"
-                      title="下载最新版本"
-                    >
-                      <ArrowUpCircle className="h-3 w-3 text-blue-500" />
-                    </button>
+                  {hasUpdate && updateInfo ? (
+                    <>
+                      <span className="text-blue-600 dark:text-blue-400">
+                        新版本 v{updateInfo.latestVersion}
+                      </span>
+                      <button
+                        onClick={() => setUpdateDialogOpen(true)}
+                        className="cursor-pointer"
+                        title="下载最新版本"
+                      >
+                        <ArrowUpCircle className="h-3 w-3 text-blue-500" />
+                      </button>
+                    </>
+                  ) : (
+                    <span>v{currentVersion ?? '-'}</span>
                   )}
                 </div>
               </div>
