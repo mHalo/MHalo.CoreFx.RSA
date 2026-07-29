@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { type CheckResult } from '@/services/versionCheckService'
 import { downloadUpdate, onDownloadProgress } from '@/services/tauriFsService'
+import { useUpdateStore } from '@/stores/updateStore'
 import { Download, ExternalLink } from 'lucide-react'
 
 type Phase = 'confirm' | 'downloading' | 'done' | 'error'
@@ -37,6 +38,7 @@ export default function UpdateDialog({ open, onClose, updateInfo }: Props) {
   const [progress, setProgress] = useState(0)
   const [errorMsg, setErrorMsg] = useState('')
   const unlistenRef = useRef<(() => void) | null>(null)
+  const simulateDownload = useUpdateStore((s) => s.simulateDownload)
 
   const handleStart = useCallback(async () => {
     if (!updateInfo.downloadUrl) {
@@ -48,7 +50,15 @@ export default function UpdateDialog({ open, onClose, updateInfo }: Props) {
     setPhase('downloading')
     setProgress(0)
 
-    // 注册进度监听
+    // Debug 模式：使用模拟下载
+    if (import.meta.env.DEV) {
+      await simulateDownload(setProgress)
+      setPhase('done')
+      setProgress(100)
+      return
+    }
+
+    // 正式环境：Tauri 下载 + 进度事件
     const unlisten = await onDownloadProgress(({ downloaded, total }) => {
       if (total > 0) {
         setProgress(Math.round((downloaded / total) * 100))
