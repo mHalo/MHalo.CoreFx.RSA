@@ -57,42 +57,6 @@ function NavGroup({ title, items }: { title: string; items: typeof toolNav }) {
   )
 }
 
-function UpdateIndicator() {
-  const isChecking = useUpdateStore((s) => s.isChecking)
-  const hasUpdate = useUpdateStore((s) => s.hasUpdate)
-  const latestVersion = useUpdateStore((s) => s.updateInfo?.latestVersion)
-  const latestUrl = useUpdateStore((s) => s.updateInfo?.latestUrl)
-  const check = useUpdateStore((s) => s.checkForUpdate)
-
-  useEffect(() => {
-    check()
-  }, [check])
-
-  if (isChecking) {
-    return (
-      <span className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground" />
-        检查更新中…
-      </span>
-    )
-  }
-
-  if (hasUpdate && latestVersion) {
-    return (
-      <button
-        onClick={() => window.open(latestUrl, '_blank')}
-        className="flex items-center justify-center gap-1 text-xs text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors cursor-pointer"
-        title={`发现新版本 v${latestVersion}`}
-      >
-        <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-        新版本 v{latestVersion}
-      </button>
-    )
-  }
-
-  return null
-}
-
 function WasmStatus() {
   const wasmReady = useKeyStore((s) => s.wasmReady)
   const wasmError = useKeyStore((s) => s.wasmError)
@@ -198,7 +162,6 @@ export default function Layout() {
           <Separator className="bg-sidebar-border" />
           <div className="space-y-1.5 px-4 py-3">
             <WasmStatus />
-            <UpdateIndicator />
           </div>
         </aside>
 

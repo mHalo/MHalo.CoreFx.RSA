@@ -7,19 +7,24 @@ const DEBUG_INFO: CheckResult = {
   currentVersion: '1.2.0',
   latestVersion: '1.3.0',
   latestUrl: 'https://github.com/mHalo/MHalo.CoreFx.RSA/releases/tag/v1.3.0',
-  downloadUrl: 'https://example.com/update.dmg',
-  releaseBody: `### 🚀 新功能
+  downloadUrl: 'https://example.com/RSA.ToolBox_1.3.0_aarch64.dmg',
+  releaseBody: `v1.3.0 主要带来了全新的应用内更新体验，打开弹窗即可查看变更、一键下载安装。
+
+## 🚀 新功能
 - 全新的更新弹窗，支持变更日志展示
 - 下载进度条实时反馈
 - 下载完成后自动打开安装包
+- 侧边栏显示当前版本号与更新提示
 
-### 🐛 修复
+## 🐛 修复
 - 修复 Windows MSI 打包中文文件名错误
 - 修复 macOS DMG ad-hoc 签名不完整导致 Gatekeeper 拒绝
+- 修复设置页底部分割线多余渲染
 
-### 🔧 改进
-- 侧边栏显示当前版本号
-- 设置页手动检查更新 + toast 反馈`,
+## 🔧 改进
+- 更新检测结果 toast 提示
+- 侧边栏悬浮面板增加圆角与阴影
+- 应用窗口标题栏样式优化`,
   isUpdateAvailable: true,
   publishedAt: new Date().toISOString()
 }
