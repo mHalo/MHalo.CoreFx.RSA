@@ -25,6 +25,16 @@
 | 🔄 **格式转换** | PEM ↔ XML 密钥格式互转，实时格式检测 |
 | ⚙️ **设置** | 主题色、暗色模式、圆角、默认密钥参数、严格位对齐 |
 
+## 界面预览
+
+<p style="background:#FFF;padding:12px 3px;display:flex;justify-content:space-evenly;">
+  <img src="docs/screenshots/01-keygen.png" width="18.5%" alt="密钥生成" />
+  <img src="docs/screenshots/02-crypt.png" width="18.5%" alt="加解密" />
+  <img src="docs/screenshots/03-sign.png" width="18.5%" alt="签名验签" />
+  <img src="docs/screenshots/04-transform.png" width="18.5%" alt="格式转换" />
+  <img src="docs/screenshots/05-settings.png" width="18.5%" alt="设置" />
+</p>
+
 ## 构建
 
 ### 前置条件
